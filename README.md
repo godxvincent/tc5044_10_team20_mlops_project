@@ -1,2 +1,5 @@
-# tc5044_10_team20_mlops_project
+# Team20 MLOps Project
 Private project for MLOps course 
+
+
+## Configuración de DVC luego 
