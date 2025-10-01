@@ -5,6 +5,8 @@ Private project for MLOps course
 
 Antes de iniciar a trabajar con este repositorio por favor garantizar que tiene python 3.13.1 instalado (usando pyenv es una buena alternativa).
 
+`pyenv install 3.13.1`
+
 Una vez el python este garantizado, deben crear un entorno virtual para ello ejecutar la siguiente instrucción.
 
 `python -m venv venv`
