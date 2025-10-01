@@ -79,15 +79,15 @@ Como verá en la configuración inicial ya se han subido los archivos iniciales 
 * [Config Files](https://dvc.org/doc/user-guide/project-structure/configuration)
 * [Configuracion de Google Drive](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive)
 
-## MLflow
+## MLFlow
 
-MLflow es una plataforma para gestionar el ciclo de vida de ML:
+MLFlow es una plataforma para gestionar el ciclo de vida de ML:
 
 - Tracking: registra parámetros, métricas, artefactos y código de cada experimento.
 - Models: estandariza y versiona modelos (formato empaquetado y “flavors”).
 - Model Registry: catálogo/registro con versiones y stages (None, Staging, Production, Archived).
 
-MLflow necesita un server donde almacenara los resultados, para correr este server en local pueden correr el siguiente comando
+MLFlow necesita un server donde almacenara los resultados, para correr este server en local pueden correr el siguiente comando
 
 `mlflow server --host 127.0.0.1 --port 8080` 
 
@@ -96,3 +96,7 @@ El cliente puede conectarse al servidor de mlflow mediante la siguiente linea de
 `mlflow.set_tracking_uri("http://127.0.0.1:8080")`
 
 MLFlow creara las carpetas /mlruns y /mlartifacts para almacenar los resultados de los modelos, posteriormente trabajaremos para tener un servidor externo donde guardaremos estos resultados.
+
+### Links de utilidad de MLFlow
+
+* [MLFlow Docs](https://mlflow.org/docs/2.5.0/quickstart.html#)
