@@ -36,6 +36,18 @@ Con dichas credenciales debera crear un archivo dentro del folder `.dvc` con nom
     gdrive_client_secret = XXXXXXX-yyyyyyyyyyyyyyyyyy
 ```
 
+Pueden añadir las credenciales mediante los siguientes comandos
+
+`dvc remote modify datasets gdrive_client_id 'client_id'`
+
+`dvc remote modify datasets gdrive_client_secret 'secret'`
+
+Para descargar los datasets de Drive pueden correr el siguiente comando
+
+`dvc pull`
+
+Probablemente tienes que dar permiso al uso Google Drive API para tu proyecto Google Cloud
+
 ## Uso de DVC
 
 ### Incluir nuevos archivos
@@ -66,3 +78,21 @@ Como verá en la configuración inicial ya se han subido los archivos iniciales 
 * [DVC Start](https://dvc.org/doc/start)
 * [Config Files](https://dvc.org/doc/user-guide/project-structure/configuration)
 * [Configuracion de Google Drive](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive)
+
+## MLflow
+
+MLflow es una plataforma para gestionar el ciclo de vida de ML:
+
+- Tracking: registra parámetros, métricas, artefactos y código de cada experimento.
+- Models: estandariza y versiona modelos (formato empaquetado y “flavors”).
+- Model Registry: catálogo/registro con versiones y stages (None, Staging, Production, Archived).
+
+MLflow necesita un server donde almacenara los resultados, para correr este server en local pueden correr el siguiente comando
+
+`mlflow server --host 127.0.0.1 --port 8080` 
+
+El cliente puede conectarse al servidor de mlflow mediante la siguiente linea de codigo
+
+`mlflow.set_tracking_uri("http://127.0.0.1:8080")`
+
+MLFlow creara las carpetas /mlruns y /mlartifacts para almacenar los resultados de los modelos, posteriormente trabajaremos para tener un servidor externo donde guardaremos estos resultados.
