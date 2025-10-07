@@ -100,3 +100,5 @@ MLFlow creara las carpetas /mlruns y /mlartifacts para almacenar los resultados 
 ### Links de utilidad de MLFlow
 
 * [MLFlow Docs](https://mlflow.org/docs/2.5.0/quickstart.html#)
+
+Nota de prueba de Miriam
