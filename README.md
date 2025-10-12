@@ -103,3 +103,4 @@ MLFlow creara las carpetas /mlruns y /mlartifacts para almacenar los resultados 
 
 Nota de prueba de Miriam
 Nota de cambio1 de Esmeralda
+Nota de cambio2 de Esmer
