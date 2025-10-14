@@ -1,2 +1,2 @@
 pywin32==311
--r requirements.txt
+-r requirements-dev.txt
