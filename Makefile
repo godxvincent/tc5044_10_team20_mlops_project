@@ -111,3 +111,7 @@ help:
 	@echo "  make predict              -> Predecir con modelos"
 	@echo "  make plots                -> Generar figuras"
 	@echo "  make notebooks            -> Ejecutar notebooks"
+
+
+test:
+	pytest --cov=mlops --cov-report=html

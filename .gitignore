@@ -211,3 +211,6 @@ mlruns/
 mlruns/*
 mlartifacts/
 mlartifacts/*
+
+*.vscode*
+*.DS_Store*
