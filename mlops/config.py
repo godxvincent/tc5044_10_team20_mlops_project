@@ -50,7 +50,3 @@ class MLConfigLoader():
             return parameter
         
         raise ValueError(f"Parameter {parameterName} not found")
-
-
-a = MLConfigLoader()
-a.getParameter("mlflowconfig")
