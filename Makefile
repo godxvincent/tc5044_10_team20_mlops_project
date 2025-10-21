@@ -119,5 +119,4 @@ test:
 	pytest --cov=mlops --cov-report=html
 
 load_pp:
-# 	export PYTHONPATH=$(pwd)
-	echo ${PYTHONPATH}
+	export PYTHONPATH=$(pwd)
