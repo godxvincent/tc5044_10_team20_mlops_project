@@ -1,0 +1,14 @@
+default:
+
+local:
+  mlconfig:
+    mlflowconfig:
+      server: "http://127.0.0.1"
+      port: "8080"
+
+
+produccion:
+  mlconfig:
+    mlflowconfig:
+      server: "prduccion_server"
+      port: "5000"

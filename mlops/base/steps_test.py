@@ -1,5 +1,5 @@
 import pytest
-from mlops.base.models import DataLoaderBase, defaultFunctionTest
+from mlops.base.steps import DataLoaderBase, defaultFunctionTest
 
 
 def test_defaultFunctionTest():

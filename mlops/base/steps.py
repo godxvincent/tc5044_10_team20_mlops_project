@@ -4,12 +4,14 @@ from pandas import DataFrame
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
+from mlops.base.logger import BaseLogger
 
 
 def defaultFunctionTest(a:int, b:int) -> int:
     return a+b
 
-class MLPipelineBase(ABC):
+
+class MLPipelineBase(ABC, BaseLogger):
     def __init__(self):
         super().__init__()
 
@@ -29,7 +31,7 @@ class MLPipelineBase(ABC):
     def evaluate(self):
         pass
 
-class DataLoaderBase(ABC):
+class DataLoaderBase(ABC, BaseLogger):
 
     def __init__(self):
         super().__init__()
@@ -55,7 +57,7 @@ class DataLoaderBase(ABC):
         pass 
 
 
-class FeatureEngineProcessorBase(ABC):
+class FeatureEngineProcessorBase(ABC, BaseLogger):
 
     """
         Esta clase define los metodos minimos que deberia tener cualquier clase encargada de hacer limpieza de datos, así como ingenieria de 

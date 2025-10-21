@@ -13,6 +13,8 @@ NOTEBOOKS_DIR := notebooks
 REPORTS_DIR := reports
 FIGURES_DIR := figures
 SRC_DIR := mlops
+PYTHONPATH=$(pwd)
+ENV_FOR_DYNACONF=local
  
 # ============================================================
 #CONFIGURACIÓN DE ENTORNO
@@ -115,3 +117,6 @@ help:
 
 test:
 	pytest --cov=mlops --cov-report=html
+
+load_pp:
+	export PYTHONPATH=$(pwd)
