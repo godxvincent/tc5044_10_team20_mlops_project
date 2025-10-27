@@ -1,11 +1,13 @@
 default:
-
+# Podemos agregar cualquier configuracion general en esta sección
+  external_api:
+    server: "database_server"
+    port: "8080"
 local:
   mlconfig:
     mlflowconfig:
       server: "http://127.0.0.1"
       port: "8080"
-
 
 produccion:
   mlconfig:

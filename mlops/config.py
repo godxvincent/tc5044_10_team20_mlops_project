@@ -1,25 +1,12 @@
 
-from dataclasses import dataclass
-from omegaconf import OmegaConf
-import pathlib
-import os
-
 from dynaconf import Dynaconf
 
-# Pendiente revisar si hace sentido tener estos dataclass
-@dataclass
-class MLFlowConfig:
-    server: str = ""
-    port: str = ""
+DEFAULT_ROOT_PARAMS = "MLCONFIG"
 
-@dataclass
-class MLConfig:
-    mlFlowConfig: MLFlowConfig
-    
 class MLConfigLoader():
 
     def __init__(self):
-        self.config = MLConfig(MLFlowConfig())
+        self.settings = dict()
         self.__load()
 
     def __load(self):
@@ -33,7 +20,7 @@ class MLConfigLoader():
                 type = "yaml",
                 merge_enabled = True,
             )
-            rootParameters = self.settings.get("MLCONFIG",None)
+            rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS,None)
             if rootParameters == None:
                 raise FileNotFoundError("Config file not found") 
         except AttributeError as ae:
@@ -42,7 +29,6 @@ class MLConfigLoader():
 
 
     def getParameter(self, parameterName:str) -> any:
-        
         rootParameters = self.settings.get("MLCONFIG",None)
         lowerCaseParameterName = parameterName.lower()
         parameter = rootParameters.get(lowerCaseParameterName, None)
@@ -50,3 +36,7 @@ class MLConfigLoader():
             return parameter
         
         raise ValueError(f"Parameter {parameterName} not found")
+
+
+c = MLConfigLoader()
+print(c.settings)
