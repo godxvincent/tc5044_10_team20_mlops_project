@@ -1,7 +1,24 @@
-
+from typing import Any
 from dynaconf import Dynaconf
+from dataclasses import dataclass
 
 DEFAULT_ROOT_PARAMS = "MLCONFIG"
+
+@dataclass
+class BaseDataClassModel:
+    """
+        Esta clase será usada como base para la extracción de datos de configuración. 
+        Cualquier nuevo dataclass object debera heredar de esta clase para que funcione correctamente el parseo de la configuración.
+    """
+
+    def __init__(self, **kwargs):
+        self.update_from_dict(kwargs)
+
+    def update_from_dict(self, data: dict):
+        for field in self.__dataclass_fields__.values():
+            if field.name in data:
+                setattr(self, field.name, data[field.name])
+
 
 class MLConfigLoader():
 
@@ -17,10 +34,10 @@ class MLConfigLoader():
                 environments = True,
                 load_dotenv = True,
                 env_switcher = "MLOPS_ENV",
-                type = "yaml",
                 merge_enabled = True,
             )
             rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS,None)
+            print(rootParameters)
             if rootParameters == None:
                 raise FileNotFoundError("Config file not found") 
         except AttributeError as ae:
@@ -28,15 +45,16 @@ class MLConfigLoader():
             print("Detailed error: ", ae)
 
 
-    def getParameter(self, parameterName:str) -> any:
-        rootParameters = self.settings.get("MLCONFIG",None)
+    def getParameter(self, parameterName:str, object_instance:BaseDataClassModel) -> Any:
+        rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS,None)
         lowerCaseParameterName = parameterName.lower()
         parameter = rootParameters.get(lowerCaseParameterName, None)
         if parameter != None:
-            return parameter
+            try:
+                object_instance.update_from_dict(parameter.to_dict())
+                return object_instance
+            except Exception as e:
+                print("Error: ", e)      
         
         raise ValueError(f"Parameter {parameterName} not found")
 
-
-c = MLConfigLoader()
-print(c.settings)
