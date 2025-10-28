@@ -37,7 +37,6 @@ class MLConfigLoader():
                 merge_enabled = True,
             )
             rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS,None)
-            print(rootParameters)
             if rootParameters == None:
                 raise FileNotFoundError("Config file not found") 
         except AttributeError as ae:

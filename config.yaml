@@ -9,9 +9,6 @@ local:
       server: "http://127.0.0.1"
       port: "8080"
     logger:
-      #log_level: "INFO"
-      #log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-      #log_file = None
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
@@ -23,23 +20,18 @@ testing:
       server: "testing_server"
       port: "8080"
     logger:
-      #log_level: "INFO"
-      #log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-      # log_file = ""
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
       log_stream : "stdout"
 
-desarrollo:
-  mlconfig:
-    mlflowconfig:
-      server: "desarrollo_server"
-
-
-
 produccion:
   mlconfig:
     mlflowconfig:
-      server: "prduccion_server"
-      port: "5000"
+      server: "http://127.0.0.1"
+      port: "8080"
+    logger:
+      log_level : "DEBUG"
+      log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      log_date_format : "%Y-%m-%d %H:%M:%S"
+      log_stream : "stdout"

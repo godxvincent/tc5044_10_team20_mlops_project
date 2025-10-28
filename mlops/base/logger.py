@@ -4,7 +4,10 @@ import sys
 from dataclasses import dataclass
 from mlops.config import MLConfigLoader, BaseDataClassModel
 
-
+DEFAULT_STREAMS = {
+    "stdout": sys.stdout,
+    "stderr": sys.stderr,
+}
 
 @dataclass
 class LoggerConfig(BaseDataClassModel):
@@ -25,15 +28,22 @@ class BaseLogger:
         # Clave: Solo configurar si no hay handlers configurados.
         # Pytest configura sus propios handlers, por lo que esta llamada se omitirá
         # cuando se ejecute con pytest, evitando el conflicto.
-        self.__logger_config = LoggerConfig()
-        self.__load_logger_config()
+        
         if not logging.getLogger().handlers:
-            logging.basicConfig(
-                filename=self.__logger_config.log_file,
-                # No se puede usar stream y filename al mismo tiempo.
-                stream=self.__logger_config.log_stream if not self.__logger_config.log_file else None,
-                level=self.__logger_config.log_level,
-                format=self.__logger_config.log_format)
+            # TODO: Falta un test en prueba unitaria para verificar que pasa si el handler no se carga. 
+            # En este caso tenemos que agregar la variable de dynaconf hacer un mock del dynaconf.
+            self.__logger_config = LoggerConfig()
+            self.__load_logger_config()
+            logger_params = {
+                "level": self.__logger_config.log_level,
+                "format": self.__logger_config.log_format,
+                "datefmt": self.__logger_config.log_date_format,
+            }
+            if self.__logger_config.log_stream:
+                logger_params["stream"] = DEFAULT_STREAMS.get(self.__logger_config.log_stream, sys.stdout)
+            elif self.__logger_config.log_file:
+                logger_params["filename"] = self.__logger_config.log_file
+            logging.basicConfig(**logger_params)
         self.logger = logging.getLogger(name)
         self.__decorate_functions()
 
