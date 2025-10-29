@@ -1,4 +1,7 @@
 from mlops.base.steps import FeatureEngineProcessorBase
+from sklearn.compose import ColumnTransformer
+from typing import Optional
+
 class FeatureEngineProcessor(FeatureEngineProcessorBase):
 
     def __init__(self):
