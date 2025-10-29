@@ -1,14 +1,40 @@
 default:
-
+# Podemos agregar cualquier configuracion general en esta sección
+  external_api:
+    server: "database_server"
+    port: "8080"
 local:
   mlconfig:
     mlflowconfig:
       server: "http://127.0.0.1"
       port: "8080"
+    logger:
+      log_level : "DEBUG"
+      log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      log_date_format : "%Y-%m-%d %H:%M:%S"
+      log_stream : "stdout"
+    data_loader:
+      test_data_percentage: 0.2
 
+
+testing:
+  mlconfig:
+    mlflowconfig:
+      server: "testing_server"
+      port: "8080"
+    logger:
+      log_level : "DEBUG"
+      log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      log_date_format : "%Y-%m-%d %H:%M:%S"
+      log_stream : "stdout"
 
 produccion:
   mlconfig:
     mlflowconfig:
-      server: "prduccion_server"
-      port: "5000"
+      server: "http://127.0.0.1"
+      port: "8080"
+    logger:
+      log_level : "DEBUG"
+      log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      log_date_format : "%Y-%m-%d %H:%M:%S"
+      log_stream : "stdout"

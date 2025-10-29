@@ -1,25 +1,29 @@
-
-from dataclasses import dataclass
-from omegaconf import OmegaConf
-import pathlib
-import os
-
+from typing import Any
 from dynaconf import Dynaconf
+from dataclasses import dataclass
 
-# Pendiente revisar si hace sentido tener estos dataclass
-@dataclass
-class MLFlowConfig:
-    server: str = ""
-    port: str = ""
+DEFAULT_ROOT_PARAMS = "MLCONFIG"
 
 @dataclass
-class MLConfig:
-    mlFlowConfig: MLFlowConfig
-    
+class BaseDataClassModel:
+    """
+        Esta clase será usada como base para la extracción de datos de configuración. 
+        Cualquier nuevo dataclass object debera heredar de esta clase para que funcione correctamente el parseo de la configuración.
+    """
+
+    def __init__(self, **kwargs):
+        self.update_from_dict(kwargs)
+
+    def update_from_dict(self, data: dict):
+        for field in self.__dataclass_fields__.values():
+            if field.name in data:
+                setattr(self, field.name, data[field.name])
+
+
 class MLConfigLoader():
 
     def __init__(self):
-        self.config = MLConfig(MLFlowConfig())
+        self.settings = dict()
         self.__load()
 
     def __load(self):
@@ -30,10 +34,9 @@ class MLConfigLoader():
                 environments = True,
                 load_dotenv = True,
                 env_switcher = "MLOPS_ENV",
-                type = "yaml",
                 merge_enabled = True,
             )
-            rootParameters = self.settings.get("MLCONFIG",None)
+            rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS,None)
             if rootParameters == None:
                 raise FileNotFoundError("Config file not found") 
         except AttributeError as ae:
@@ -41,12 +44,16 @@ class MLConfigLoader():
             print("Detailed error: ", ae)
 
 
-    def getParameter(self, parameterName:str) -> any:
-        
-        rootParameters = self.settings.get("MLCONFIG",None)
+    def getParameter(self, parameterName:str, object_instance:BaseDataClassModel) -> Any:
+        rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS,None)
         lowerCaseParameterName = parameterName.lower()
         parameter = rootParameters.get(lowerCaseParameterName, None)
         if parameter != None:
-            return parameter
+            try:
+                object_instance.update_from_dict(parameter.to_dict())
+                return object_instance
+            except Exception as e:
+                print("Error: ", e)      
         
         raise ValueError(f"Parameter {parameterName} not found")
+
