@@ -53,7 +53,7 @@ class BaseLogger:
             def wrapper(*args, **kwargs):
                 self.logger.debug(f"function {func.__name__} was called with args: {args} and kwargs: {kwargs} ")
                 result = func(*args, **kwargs)
-                if type(result) != type(None) :
+                if type(result) != type(None):
                     self.logger.debug(f"function {func.__name__} returned: {result}")
                 else:
                     self.logger.debug(f"function {func.__name__} finished correctly")

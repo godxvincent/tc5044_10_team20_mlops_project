@@ -214,3 +214,5 @@ mlartifacts/*
 
 *.vscode*
 *.DS_Store*
+
+junit
