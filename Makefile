@@ -116,7 +116,7 @@ help:
 
 
 test:
-	pytest ./tests --doctest-modules --junitxml=junit/test-results.xml --cov=mlops --cov-report=xml --cov-report=html -v
+	pytest ./tests --cov-report=html
 
 load_pp:
 	export PYTHONPATH=$(pwd)
