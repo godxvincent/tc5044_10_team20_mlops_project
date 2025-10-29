@@ -29,7 +29,7 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Test with pytest
         run: |
-          pytest tests.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+          pytest ./tests --doctest-modules --junitxml=junit/test-results.xml --cov=mlops --cov-report=xml --cov-report=html -v
   building:
     runs-on: ubuntu-latest
     steps:
