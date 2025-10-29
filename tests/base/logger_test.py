@@ -1,4 +1,9 @@
+import os
 from mlops.base.logger import BaseLogger
+from unittest.mock import Mock, patch
+import pytest
+from logging import Logger
+
 
 class OtherClass(BaseLogger):
 
@@ -29,3 +34,22 @@ def test_sayHello_logs_message(caplog):
     # Verificar que el mensaje DEBUG fue registrado
     assert "Hello Test" in caplog.text
     assert caplog.records[0].levelname == "DEBUG"
+
+class LoggerMock(Logger):
+    def __init__(self, name, level = 0):
+        super().__init__(name, level)
+        self.handlers = []
+
+
+@patch("logging.getLogger")
+def test_mock_logger(mock_requests_getLogger, caplog):
+
+    os.environ["ENV_FOR_DYNACONF"] = "testing"
+    lm = LoggerMock("testLogger")
+
+    mock_requests_getLogger.return_value = lm
+    testClass = OtherClass()
+    testClass.sayHello("Test")
+    mock_requests_getLogger.assert_called()
+
+    os.environ.pop("ENV_FOR_DYNACONF", None)
