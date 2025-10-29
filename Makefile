@@ -116,7 +116,7 @@ help:
 
 
 test:
-	pytest ./tests --cov-report=html
+	pytest ./tests
 
 load_pp:
 	export PYTHONPATH=$(pwd)

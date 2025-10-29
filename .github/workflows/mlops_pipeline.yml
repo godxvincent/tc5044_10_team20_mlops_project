@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  validating-and-testing:
+  validate-and-test:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -26,11 +26,24 @@ jobs:
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Test with pytest
         run: |
           pytest ./tests 
-  building:
+      - name: Archive xml files for code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: coverage.xml
+          retention-days: 5
+      - name: Archive html files for code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ./htmlcov/**
+          retention-days: 5
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  build:
+    needs: validate-and-test
     runs-on: ubuntu-latest
     steps:
       - run: |
