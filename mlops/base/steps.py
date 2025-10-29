@@ -34,7 +34,7 @@ class MLPipelineBase(ABC, BaseLogger):
 class DataLoaderBase(ABC, BaseLogger):
 
     def __init__(self):
-        super().__init__()
+        super().__init__(self.__class__.__name__)
 
     @abstractmethod
     def loadFile(self, file_name:str) -> Dict:
