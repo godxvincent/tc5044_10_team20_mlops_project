@@ -1,0 +1,7 @@
+# Command: black .
+# Exit code: 0
+
+
+# STDERR
+All done! \u2728 \U0001f370 \u2728
+26 files left unchanged.
