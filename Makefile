@@ -116,7 +116,7 @@ help:
 
 
 test:
-	pytest --cov=mlops --cov-report=html -v
+	pytest ./tests
 
 load_pp:
 	export PYTHONPATH=$(pwd)

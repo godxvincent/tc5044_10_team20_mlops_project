@@ -7,13 +7,9 @@ from sklearn.decomposition import PCA
 from mlops.base.logger import BaseLogger
 
 
-def defaultFunctionTest(a:int, b:int) -> int:
-    return a+b
-
-
 class MLPipelineBase(ABC, BaseLogger):
     def __init__(self):
-        super().__init__()
+        super().__init__(self.__class__.__name__)
 
     @abstractmethod
     def loadData(self, file_name:str):
@@ -70,7 +66,7 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
     """
     def __init__(self):
         self.__PCAfeaturesScaled = False
-        super().__init__()
+        super().__init__(self.__class__.__name__)
 
     def createPipeline(self) -> Pipeline:
 
@@ -162,7 +158,7 @@ class ModelTrainerBase(ABC, BaseLogger):
         """
         self.pipeline = pipeline
         self.datasets = datasets
-        super().__init__()
+        super().__init__(self.__class__.__name__)
 
     @abstractmethod
     def _createModel(self) -> Pipeline:
