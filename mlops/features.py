@@ -1,12 +1,34 @@
+from dataclasses import dataclass
+
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import StandardScaler
+from sklearn.feature_selection import SelectKBest
 from mlops.base.steps import FeatureEngineProcessorBase
-from sklearn.compose import ColumnTransformer
+from sklearn.compose import ColumnTransformer, make_column_transformer
 from typing import Optional
+
+from mlops.config import BaseDataClassModel, MLConfigLoader
+
+
+@dataclass
+class FeatureEngineProcessorConfig(BaseDataClassModel):
+    k_features: int 
+    n_components: int
+
+
+    def __init__(self, **kwargs):
+        """
+            Clase modelo de datos para la configuración del data loader.
+        """
+        super().__init__(**kwargs)
 
 class FeatureEngineProcessor(FeatureEngineProcessorBase):
 
     def __init__(self):
+        self.config = MLConfigLoader().getParameter("feature_engine", FeatureEngineProcessorConfig())
         super().__init__()
-
+        
+        
     def _createImputer(self) -> Optional[ColumnTransformer]:
         """
             La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer 
@@ -44,4 +66,8 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
             esto se ha añadido el atributo __PCAfeaturesScaled que debe ser cambiado a True si este metodo si hizo el scaler de 
             los feature para PCA.
         """
-        pass
+        
+         
+        return make_column_transformer((PCA(n_components=self.config.n_components), self.numerical_features))
+        
+        
