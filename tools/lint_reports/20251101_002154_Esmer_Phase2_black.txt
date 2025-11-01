@@ -1,0 +1,47 @@
+# Command: black --verbose --check .
+# Exit code: 0
+
+
+# STDERR
+Identified `C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project` as project root containing a .git directory.
+Using configuration from project root.
+line_length: 150
+target_version: ['py310']
+Found input source directory: "C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project"
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\.dvc\cache ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\.dvc\config.local ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\.dvc\tmp ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\.git ignored: matches the --exclude regular expression
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\.vscode ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\datasets\.DS_Store ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\datasets\input\test.txt ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\datasets\input\test2.txt ignored: matches a .gitignore file content
+Skipping .ipynb files as Jupyter dependencies are not installed.
+You can fix this by running ``pip install "black[jupyter]"``
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\venv ignored: matches a .gitignore file content
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\__init__.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\base\__init__.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\base\logger.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\base\steps.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\config.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\dataset.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\features.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\modeling\__init__.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\modeling\predict.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\modeling\train.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\mlops\plots.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\__init__.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\base\__init__.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\base\logger_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\base\steps_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\config_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\dataset_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\features_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\modeling\__init__.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\modeling\predict_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\modeling\train_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tests\plots_test.py wasn't modified on disk since last run.
+C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tools\run_linters_and_save_reports.py wasn't modified on disk since last run.
+
+All done! \u2728 \U0001f370 \u2728
+23 files would be left unchanged.
