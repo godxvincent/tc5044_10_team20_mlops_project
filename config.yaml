@@ -15,6 +15,18 @@ local:
       log_stream : "stdout"
     data_loader:
       test_data_percentage: 0.2
+    model_trainer:
+      iterations: 30
+      cv_folds: 5                   
+      scoring: "accuracy"         
+      random_state: 42             
+      verbose: 2 
+    feature_engine:
+      k_features: 15 
+      n_components: 8
+
+                  
+
 
 
 testing:

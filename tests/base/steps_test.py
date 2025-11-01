@@ -1,6 +1,4 @@
-import pytest
-from mlops.base.steps import DataLoaderBase, FeatureEngineProcessorBase, ModelTrainerBase
-from mlops.base.steps import MLPipelineBase
+from mlops.base.steps import DataLoaderBase, FeatureEngineProcessorBase, MLPipelineBase, ModelTrainerBase
 
 
 class MLPipelinePrueba(MLPipelineBase):
@@ -8,7 +6,7 @@ class MLPipelinePrueba(MLPipelineBase):
     def __init__(self):
         super().__init__()
 
-    def loadData(self, file_name:str):
+    def loadData(self, file_name: str):
         pass
 
     def cleanUpData(self):
@@ -20,12 +18,13 @@ class MLPipelinePrueba(MLPipelineBase):
     def evaluate(self):
         pass
 
+
 class DataLoaderPrueba(DataLoaderBase):
 
     def __init__(self):
         super().__init__()
 
-    def loadFile(self, file_name:str):
+    def loadFile(self, file_name: str):
         pass
 
     def getShape(self):
@@ -36,6 +35,7 @@ class DataLoaderPrueba(DataLoaderBase):
 
     def getTrainTestDataSet(self):
         pass
+
 
 class FeatureEngineProcessorPrueba(FeatureEngineProcessorBase):
 
@@ -57,6 +57,7 @@ class FeatureEngineProcessorPrueba(FeatureEngineProcessorBase):
     def _createFeatureReducer(self):
         pass
 
+
 class ModelTrainerPrueba(ModelTrainerBase):
     def __init__(self, pipeline, datasets):
         super().__init__(pipeline, datasets)
@@ -73,13 +74,15 @@ class ModelTrainerPrueba(ModelTrainerBase):
     def predict(self):
         pass
 
-    def get_model_attributes(self,**kwargs):
+    def get_model_attributes(self, **kwargs):
         pass
 
+
 def test_model_trainer_class():
-    from sklearn.pipeline import Pipeline
     from pandas import DataFrame
-    pipeline = Pipeline([('test', 'test')])
+    from sklearn.pipeline import Pipeline
+
+    pipeline = Pipeline([("test", "test")])
     datasets = {
         "trainX": DataFrame(),
         "trainY": DataFrame(),
@@ -87,17 +90,20 @@ def test_model_trainer_class():
         "testY": DataFrame(),
     }
     test_class = ModelTrainerPrueba(pipeline, datasets)
-    assert test_class != None
+    assert test_class is not None
+
 
 def test_data_loader_class():
     test_class = DataLoaderPrueba()
-    assert test_class != None 
+    assert test_class is not None
+
 
 def test_mlpipeline_class():
     test_class = MLPipelinePrueba()
-    assert test_class != None
+    assert test_class is not None
+
 
 def test_feature_engine_class():
     test_class = FeatureEngineProcessorPrueba()
-    assert test_class != None
-    assert test_class.createPipeline() != None
+    assert test_class is not None
+    assert test_class.createPipeline() is not None
