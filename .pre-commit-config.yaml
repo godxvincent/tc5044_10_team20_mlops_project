@@ -28,16 +28,16 @@ repos:
     hooks:
       - id: nbstripout
 
-  # 5) Hook local: genera TXT con Black/Flake8 (timestamp_usuario_rama)
-  - repo: local
-    hooks:
-      - id: save-lint-reports
-        name: Save lint reports (Black & Flake8) to tools/lint_reports
-        entry: python tools/run_linters_and_save_reports.py --check --verbose
-        language: python
-        additional_dependencies:
-          - black==25.9.0
-          - flake8==7.1.1
-        pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
+  # # 5) Hook local: genera TXT con Black/Flake8 (timestamp_usuario_rama)
+  # - repo: local
+  #   hooks:
+  #     - id: save-lint-reports
+  #       name: Save lint reports (Black & Flake8) to tools/lint_reports
+  #       entry: python tools/run_linters_and_save_reports.py --check --verbose
+  #       language: python
+  #       additional_dependencies:
+  #         - black==25.9.0
+  #         - flake8==7.1.1
+  #       pass_filenames: false
+  #       always_run: true
+  #       stages: [pre-commit]
