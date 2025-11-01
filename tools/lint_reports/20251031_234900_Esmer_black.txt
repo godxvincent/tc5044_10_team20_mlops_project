@@ -1,9 +1,0 @@
-# Command: black .
-# Exit code: 0
-
-
-# STDERR
-reformatted C:\Users\Esmer\OneDrive\Documentos\GitHub\tc5044_10_team20_mlops_project\tools\run_linters_and_save_reports.py
-
-All done! \u2728 \U0001f370 \u2728
-1 file reformatted, 25 files left unchanged.

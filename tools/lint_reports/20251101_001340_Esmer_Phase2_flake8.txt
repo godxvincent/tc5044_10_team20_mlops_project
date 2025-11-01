@@ -1,3 +1,0 @@
-# Command: flake8 .
-# Exit code: 0
-
