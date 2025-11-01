@@ -21,6 +21,9 @@ local:
       scoring: "accuracy"         
       random_state: 42             
       verbose: 2 
+    feature_engine:
+      k_features: 15 
+      n_components: 8
 
                   
 
