@@ -26,7 +26,7 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
 
     def __init__(self):
         self.config = MLConfigLoader().getParameter("feature_engine", FeatureEngineProcessorConfig())
-        self.numerical_features = [x for x in EXPECTED_SCHEMA if EXPECTED_SCHEMA[x] in ['float64', 'int64']]
+        self.numerical_features = [x for x in EXPECTED_SCHEMA if EXPECTED_SCHEMA[x] in ["float64", "int64"]]
         super().__init__()
 
     def _createImputer(self) -> Optional[ColumnTransformer]:
@@ -34,7 +34,7 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de imputar los valores faltantes.
         """
-        return make_column_transformer(SimpleImputer(strategy='median'), self.numerical_features)
+        return make_column_transformer(SimpleImputer(strategy="median"), self.numerical_features)
 
     def _createStandardizer(self) -> Optional[ColumnTransformer]:
         """

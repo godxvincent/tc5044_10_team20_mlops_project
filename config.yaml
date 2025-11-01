@@ -22,8 +22,7 @@ local:
     model_trainer:
       iterations: 30
       cv_folds: 5                   
-      scoring: "accuracy"         
-      random_state: 42             
+      scoring: "accuracy"               
       verbose: 2 
     feature_engine:
       k_features: 15 

@@ -7,22 +7,21 @@ Propósito:
 
 """
 
-
-from dataclasses import dataclass
-
-from sklearn.model_selection import train_test_split
-from mlops.base.steps import DataLoaderBase
-from typing import Dict, List, Self, Tuple, Optional
-from pandas import DataFrame, read_csv, Series
-import pandas as pd
-from mlops.config import BaseDataClassModel, MLConfigLoader
 import os
 import pathlib
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Self, Tuple
 
+import pandas as pd
+from pandas import DataFrame, Series, read_csv
+from sklearn.model_selection import train_test_split
+
+from mlops.base.steps import DataLoaderBase
+from mlops.config import BaseDataClassModel, MLConfigLoader
 from mlops.modeling.constants import EXPECTED_SCHEMA
 
-
 DEFAULT_INTERIM_DIR = os.path.join(pathlib.Path(__file__).parent.parent.absolute(), "data", "interim")
+DEFAULT_EXTERNAL_DIR = os.path.join(pathlib.Path(__file__).parent.parent.absolute(), "data", "external")
 
 TARGET_COLUMN = ["Class"]
 
@@ -38,18 +37,21 @@ class DataLoaderConfig(BaseDataClassModel):
         """
         super().__init__(**kwargs)
 
+
 class DataCleanUpException(Exception):
     """
     Excepción personalizada para errores donde no se ha llamado la limpieza de datos.
     """
+
     def __init__(self, mensaje="La temperatura está fuera del rango permitido."):
         # Llamar al constructor de la clase base Exception
-        super().__init__(mensaje) 
+        super().__init__(mensaje)
         self.mensaje = mensaje
 
     def __str__(self):
         """Define cómo se representará la excepción cuando se imprima."""
-        return f'Se debe ejecutar la limpieza de datos para poder trabajar con ellos.'
+        return f"Se debe ejecutar la limpieza de datos para poder trabajar con ellos."
+
 
 class DataLoader(DataLoaderBase):
 
@@ -65,11 +67,15 @@ class DataLoader(DataLoaderBase):
 
     def load_file(self, file_name: str) -> Dict:
         try:
-            self.df = read_csv(file_name)
+            input_file = os.path.join(DEFAULT_EXTERNAL_DIR, file_name)
+            self.df = read_csv(input_file)
             self.__df_original = self.df.copy()
-            self.logger.warning("El dataset solo fue cargado en memoria debe ejecutarse la función run_cleaning_up() explicítamente")
+            self.logger.warning(
+                "El dataset solo fue cargado en memoria debe ejecutarse la función run_cleaning_up() explicítamente"
+            )
         except FileNotFoundError as e:
-            self.logger.debug(f"File {file_name} not found")
+            self.logger.error(f"File {file_name} not found")
+            self.logger.error(f"Make sure input file is located in this directory {DEFAULT_EXTERNAL_DIR}")
             raise e
 
     def get_shape(self) -> Tuple[int, int]:
@@ -83,7 +89,7 @@ class DataLoader(DataLoaderBase):
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
     def get_train_test_dataset(self) -> Dict[str, DataFrame]:
-        
+
         if self.data_cleaned:
             random_state = self.general_config.random_state
             test_size = self.config.test_size
@@ -109,7 +115,7 @@ class DataLoader(DataLoaderBase):
         """
         if self.__check_df_loaded():
             self.logger.info("Mostrando df.info():")
-            return self.df.info()        
+            return self.df.info()
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
     def get_null_summary(self) -> Optional[Series]:
@@ -119,10 +125,10 @@ class DataLoader(DataLoaderBase):
         if self.__check_df_loaded():
             nulos = self.df.isnull().sum()
             return nulos[nulos > 0].sort_values(ascending=False)
-        
+
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
-    def get_column_distribution(self, target_col: str = 'Class') -> Optional[Series]:
+    def get_column_distribution(self, target_col: str = "Class") -> Optional[Series]:
         """
         Retorna el conteo de valores de la columna objetivo.
         """
@@ -141,29 +147,25 @@ class DataLoader(DataLoaderBase):
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
     #
-    def run_cleaning_up(
-        self, 
-        save_cleaned_file: bool = False, 
-        output_file_name: str = 'cleaned_data.csv'
-    ) -> Self:
+    def run_cleaning_up(self, save_cleaned_file: bool = False, output_file_name: str = "cleaned_data.csv") -> Self:
         """
-            Esta función se encarga de garantizar que el dataset que se procesara tiene la estructura minima 
-            requerida para los siguientes pasos.
-            En esencia elimina cualquier columna que no siga el esquema de datos esperado.
-            Por otra parte, garantiza que cualquier dato NaN en las columnas numericas o flotantes
-            tengan valores numéricos. 
+        Esta función se encarga de garantizar que el dataset que se procesara tiene la estructura minima
+        requerida para los siguientes pasos.
+        En esencia elimina cualquier columna que no siga el esquema de datos esperado.
+        Por otra parte, garantiza que cualquier dato NaN en las columnas numericas o flotantes
+        tengan valores numéricos.
         """
         if not self.__check_df_loaded():
             raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
         self.logger.info("Iniciando pipeline de limpieza de datos...")
-        
+
         # 1. Drop columns not follow expected schema
         set_valid_columns = set(EXPECTED_SCHEMA.keys())
         set_df_columns = set(self.df.columns)
         invalid_columns = set_df_columns - set_valid_columns
-        if invalid_columns: 
-            self.df = self.df.drop(columns=invalid_columns, errors='ignore')
+        if invalid_columns:
+            self.df = self.df.drop(columns=invalid_columns, errors="ignore")
             self.logger.warning(f"Columnas inválidas eliminadas: {invalid_columns}")
 
         # 2. Convertir tipos y limpiar NaN values
@@ -172,19 +174,18 @@ class DataLoader(DataLoaderBase):
         # 3. Eliminar outliers
         self.__remove_outliers_iqr()
 
-        # 4. Normalizar columna 'Class' 
+        # 4. Normalizar columna 'Class'
         self.__clean_target_column(TARGET_COLUMN[0])
-       
+
         self.logger.info(f"Limpieza inicial del dataset completada. Shape final: {self.get_shape()}")
 
         if save_cleaned_file:
             self.__save_cleaned_file(output_file_name)
 
-
     def __save_cleaned_file(self, file_name: str) -> None:
         """
         Guarda el DataFrame limpio a un nuevo archivo CSV.
-        
+
         """
         if self.__check_df_loaded():
             try:
@@ -215,15 +216,15 @@ class DataLoader(DataLoaderBase):
         numeric_cols = set(EXPECTED_SCHEMA.keys()).difference(TARGET_COLUMN)
         for col in numeric_cols:
             # Solo aplicar limpieza de string si es 'object'
-            if self.df[col].dtype == 'object':
+            if self.df[col].dtype == "object":
                 self.logger.debug(f"Limpiando y convirtiendo columna object: {col}")
                 # Limpiar espacios
-                self.df[col] = self.df[col].astype(str).str.strip().str.replace(',', '', regex=False)
-            
+                self.df[col] = self.df[col].astype(str).str.strip().str.replace(",", "", regex=False)
+
             # Convertir a numérico y rellenar con ceros
             # errors='coerce' convierte errores de conversión en NaN
-            self.df[col] = pd.to_numeric(self.df[col], errors='coerce')
-        
+            self.df[col] = pd.to_numeric(self.df[col], errors="coerce")
+
         self.logger.info("Conversión a numérico completada.")
 
     def __remove_outliers_iqr(self):
@@ -233,12 +234,12 @@ class DataLoader(DataLoaderBase):
         outlier_k = self.config.outlier_k
         initial_rows = self.df.shape[0]
         df_clean = self.df.copy()
-        
+
         # Aplicar solo a columnas numéricas (todas excepto el target)
         numeric_cols = df_clean.columns.difference(TARGET_COLUMN)
-        
+
         for column in numeric_cols:
-            if df_clean[column].dtype in ['float64', 'int64']:
+            if df_clean[column].dtype in ["float64", "int64"]:
                 Q1 = df_clean[column].quantile(0.25)
                 Q3 = df_clean[column].quantile(0.75)
                 IQR = Q3 - Q1
@@ -246,7 +247,7 @@ class DataLoader(DataLoaderBase):
                 high = Q3 + outlier_k * IQR
                 # Mantener solo las filas dentro del rango
                 df_clean = df_clean[(df_clean[column] >= low) & (df_clean[column] <= high)]
-        
+
         self.df = df_clean
         rows_dropped = initial_rows - self.df.shape[0]
         self.logger.info(f"Eliminados {rows_dropped} outliers usando IQR (outlier_k={outlier_k}).")
@@ -266,7 +267,6 @@ class DataLoader(DataLoaderBase):
             self.df[target_col] = self.df[target_col].astype(str).str.strip().str.lower()
             self.logger.info(f"Columna target '{target_col}' estandarizada (strip, lower).")
 
-    
     def get_original_shape(self) -> Tuple[int, int]:
         if self.__check_df_loaded():
             return self.__df_original.shape
@@ -278,9 +278,6 @@ class DataLoader(DataLoaderBase):
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
 
-
-
-
 # if __name__ == "__main__":
 #     dataLoader = DataLoader()
 #     dataLoader.load_file("data/external/turkish_music_emotion_modified.csv")
@@ -289,4 +286,4 @@ class DataLoader(DataLoaderBase):
 #     print(dataLoader.get_info())
 #     print(dataLoader.get_null_summary())
 #     print(dataLoader.run_cleaning_up(save_cleaned_file=True, output_file_name='cleaned_data_refactored.csv'))
-    #dataLoader.save_cleaned_file('cleaned_data.csv') #checar ruta correcta para la exportacion
+# dataLoader.save_cleaned_file('cleaned_data.csv') #checar ruta correcta para la exportacion

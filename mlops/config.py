@@ -21,6 +21,7 @@ class BaseDataClassModel:
             if field.name in data:
                 setattr(self, field.name, data[field.name])
 
+
 class GeneralParameters(BaseDataClassModel):
     random_state: int
 
@@ -29,6 +30,7 @@ class GeneralParameters(BaseDataClassModel):
         Clase modelo de datos para la configuración general del proyecto.
         """
         super().__init__(**kwargs)
+
 
 class MLConfigLoader:
 
