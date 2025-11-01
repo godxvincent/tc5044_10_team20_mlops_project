@@ -61,12 +61,14 @@ class ModelTrainerConfig(BaseDataClassModel):
 class ModelTrainer(ModelTrainerBase):
 
     def __init__(self, pipeline, datasets):
-        self.model_trainer_config = MLConfigLoader().getParameter("model_trainer", ModelTrainerConfig())
+        mlconfigloader = MLConfigLoader()
+        self.model_trainer_config = mlconfigloader.getParameter("model_trainer", ModelTrainerConfig())
+        self.general_params = mlconfigloader.general_parameters
         super().__init__(pipeline, datasets)
         self.model = None
 
     def _createModel(self):
-        classifier = RandomForestClassifier(random_state=self.model_trainer_config.random_state)
+        classifier = RandomForestClassifier(random_state=self.general_params.random_state)
         return Pipeline([("preprocessing", self.pipeline), ("classifier", classifier)])
 
     def train(self):
@@ -119,12 +121,14 @@ class ModelTrainer(ModelTrainerBase):
 class ModelTrainerGB(ModelTrainerBase):
     def __init__(self, pipeline, datasets):
         # Cargar configuración específica para Gradient Boosting
-        self.model_trainer_config = MLConfigLoader().getParameter("model_trainer", ModelTrainerConfig())
+        mlconfigloader = MLConfigLoader()
+        self.model_trainer_config = mlconfigloader.getParameter("model_trainer", ModelTrainerConfig())
+        self.general_params = mlconfigloader.general_parameters
         super().__init__(pipeline, datasets)
         self.model = None
 
     def _createModel(self):
-        classifier = GradientBoostingClassifier(random_state=self.model_trainer_config.random_state)
+        classifier = GradientBoostingClassifier(random_state=self.general_params.random_state)
         return Pipeline([("preprocessing", self.pipeline), ("classifier", classifier)])
 
     def train(self):

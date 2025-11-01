@@ -35,7 +35,7 @@ class DataLoaderBase(ABC, BaseLogger):
         super().__init__(self.__class__.__name__)
 
     @abstractmethod
-    def loadFile(self, file_name: str) -> Dict:
+    def load_file(self, file_name: str) -> Dict:
         """
         La implementación concreta deberia
         * Manejar correctamente los errores en caso de que el archivo no exista.
@@ -46,16 +46,16 @@ class DataLoaderBase(ABC, BaseLogger):
         pass
 
     @abstractmethod
-    def getShape(self):
+    def get_shape(self):
         pass
 
     @abstractmethod
-    def getStatistics(self) -> DataFrame:
+    def get_statistics(self) -> DataFrame:
         # TODO: Definir funcion comun para poder retornar la misma estructura en el DataLoader como en el DataCleaner dado un dataset.
         pass
 
     @abstractmethod
-    def getTrainTestDataSet(self) -> Dict[str, DataFrame]:
+    def get_train_test_dataset(self) -> Dict[str, DataFrame]:
         pass
 
 

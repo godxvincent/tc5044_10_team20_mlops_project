@@ -21,12 +21,21 @@ class BaseDataClassModel:
             if field.name in data:
                 setattr(self, field.name, data[field.name])
 
+class GeneralParameters(BaseDataClassModel):
+    random_state: int
+
+    def __init__(self, **kwargs):
+        """
+        Clase modelo de datos para la configuración general del proyecto.
+        """
+        super().__init__(**kwargs)
 
 class MLConfigLoader:
 
     def __init__(self):
         self.settings = dict()
         self.__load()
+        self.general_parameters = self.getParameter("general", GeneralParameters())
 
     def __load(self):
         try:
