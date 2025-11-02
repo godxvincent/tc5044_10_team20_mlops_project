@@ -22,6 +22,7 @@ class BaseDataClassModel:
                 setattr(self, field.name, data[field.name])
 
 
+@dataclass
 class GeneralParameters(BaseDataClassModel):
     random_state: int
 

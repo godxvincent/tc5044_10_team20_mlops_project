@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Dict, Optional, Self
 
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
@@ -13,19 +13,23 @@ class MLPipelineBase(ABC, BaseLogger):
         super().__init__(self.__class__.__name__)
 
     @abstractmethod
-    def loadData(self, file_name: str):
+    def load_data_step(self, file_name: str) -> Self:
         pass
 
     @abstractmethod
-    def cleanUpData(self):
+    def clean_up_data_step(self) -> Self:
         pass
 
     @abstractmethod
-    def train(self):
+    def feature_engineering_step(self) -> Self:
         pass
 
     @abstractmethod
-    def evaluate(self):
+    def train_step(self) -> Self:
+        pass
+
+    @abstractmethod
+    def evaluate_step(self) -> Self:
         pass
 
 
@@ -93,7 +97,7 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
         if featureReducer and self.__PCAfeaturesScaled:
             steps.append(("PCA", featureReducer))
 
-        return Pipeline(steps=steps)
+        return Pipeline(steps=steps).set_output(transform="pandas")
 
     @abstractmethod
     def _createImputer(self) -> Optional[ColumnTransformer]:

@@ -65,14 +65,13 @@ class ModelTrainer(ModelTrainerBase):
         self.model_trainer_config = mlconfigloader.getParameter("model_trainer", ModelTrainerConfig())
         self.general_params = mlconfigloader.general_parameters
         super().__init__(pipeline, datasets)
-        self.model = None
 
     def _createModel(self):
         classifier = RandomForestClassifier(random_state=self.general_params.random_state)
         return Pipeline([("preprocessing", self.pipeline), ("classifier", classifier)])
 
     def train(self):
-        self._createModel()
+        self.pipeline = self._createModel()
         search = self.optimize_model(PARAM_DIST_RF)
         self.best_model = search.best_estimator_
         self.logger.info("\nMejores parámetros encontrados:")
@@ -82,7 +81,7 @@ class ModelTrainer(ModelTrainerBase):
     def evaluate(self):
         X_test = self.datasets["testX"]
         Y_test = self.datasets["testY"]
-        Y_pred = self.model.predict(X_test)
+        Y_pred = self.best_model.predict(X_test)
         self.logger.info("\nEvaluación del modelo:")
         self.logger.info(classification_report(Y_test, Y_pred))
 
@@ -111,7 +110,7 @@ class ModelTrainer(ModelTrainerBase):
             cv=self.model_trainer_config.cv_folds,
             scoring=self.model_trainer_config.scoring,
             n_jobs=-1,
-            random_state=self.model_trainer_config.random_state,
+            random_state=self.general_params.random_state,
             verbose=self.model_trainer_config.verbose,
         )
         search.fit(X_train, Y_train)
@@ -132,31 +131,31 @@ class ModelTrainerGB(ModelTrainerBase):
         return Pipeline([("preprocessing", self.pipeline), ("classifier", classifier)])
 
     def train(self):
-        self._createModel()
+        self.pipeline = self._createModel()
         search = self.optimize_model(PARAM_DIST_GB)
-        self.model = search.best_estimator_
+        self.best_model = search.best_estimator_
         self.logger.info("\nMejores parámetros Gradient Boosting:")
         self.logger.info(search.best_params_)
         self.best_params_ = search.best_params_
 
     def evaluate(self):
-        if self.model is None:
+        if self.best_model is None:
             raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
         X_test = self.datasets["testX"]
         Y_test = self.datasets["testY"]
-        Y_pred = self.model.predict(X_test)
+        Y_pred = self.best_model.predict(X_test)
         self.logger.info("\nEvaluación Gradient Boosting:")
         self.logger.info(classification_report(Y_test, Y_pred))
 
     def predict(self, X):
-        if self.model is None:
+        if self.best_model is None:
             raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
-        return self.model.predict(X)
+        return self.best_model.predict(X)
 
     def get_model_attributes(self):
-        if self.model is None:
+        if self.best_model is None:
             raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
-        clf = self.model.named_steps["classifier"]
+        clf = self.best_model.named_steps["classifier"]
         return {
             "n_estimators": clf.n_estimators,
             "max_depth": clf.max_depth,

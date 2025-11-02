@@ -10,7 +10,7 @@ Propósito:
 import os
 import pathlib
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Self, Tuple
+from typing import Dict, Optional, Self, Tuple
 
 import pandas as pd
 from pandas import DataFrame, Series, read_csv
@@ -28,7 +28,7 @@ TARGET_COLUMN = ["Class"]
 
 @dataclass
 class DataLoaderConfig(BaseDataClassModel):
-    test_data_percentage: str
+    test_size: str
     outlier_k: float
 
     def __init__(self, **kwargs):
@@ -50,7 +50,7 @@ class DataCleanUpException(Exception):
 
     def __str__(self):
         """Define cómo se representará la excepción cuando se imprima."""
-        return f"Se debe ejecutar la limpieza de datos para poder trabajar con ellos."
+        return "Se debe ejecutar la limpieza de datos para poder trabajar con ellos."
 
 
 class DataLoader(DataLoaderBase):
@@ -133,7 +133,7 @@ class DataLoader(DataLoaderBase):
         Retorna el conteo de valores de la columna objetivo.
         """
         if self.__check_df_loaded(target_col):
-            self.logger.info(f"Distribución de la columna '{target_col}':")
+            self.logger.info(f"Distribución de la columna {target_col}:")
             return self.df[target_col].value_counts()
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
@@ -179,6 +179,8 @@ class DataLoader(DataLoaderBase):
 
         self.logger.info(f"Limpieza inicial del dataset completada. Shape final: {self.get_shape()}")
 
+        self.data_cleaned = True
+
         if save_cleaned_file:
             self.__save_cleaned_file(output_file_name)
 
@@ -192,7 +194,7 @@ class DataLoader(DataLoaderBase):
                 os.makedirs(DEFAULT_INTERIM_DIR, exist_ok=True)
                 output_file_name = os.path.join(DEFAULT_INTERIM_DIR, file_name)
                 self.df.to_csv(output_file_name, index=False)
-                self.logger.info(f"Dataset limpio exportado como '{output_file_name}'")
+                self.logger.info(f"Dataset limpio exportado como {output_file_name}")
             except Exception as e:
                 self.logger.error(f"No se pudo guardar el archivo: {e}")
                 raise e
@@ -205,7 +207,7 @@ class DataLoader(DataLoaderBase):
             self.logger.warning("DataFrame no cargado. Llama a loadFile() primero.")
             return False
         if check_col and check_col not in self.df.columns:
-            self.logger.warning(f"La columna '{check_col}' no se encuentra en el DataFrame.")
+            self.logger.warning(f"La columna {check_col} no se encuentra en el DataFrame.")
             return False
         return True
 
@@ -261,11 +263,11 @@ class DataLoader(DataLoaderBase):
             initial_rows = self.df.shape[0]
             self.df.dropna(subset=[target_col], inplace=True)
             rows_dropped = initial_rows - self.df.shape[0]
-            self.logger.info(f"Eliminadas {rows_dropped} filas con target ('{target_col}') nulo.")
+            self.logger.info(f"Eliminadas {rows_dropped} filas con target ({target_col}) nulo.")
 
             # 2. Estandarizar el valor de la columna target
             self.df[target_col] = self.df[target_col].astype(str).str.strip().str.lower()
-            self.logger.info(f"Columna target '{target_col}' estandarizada (strip, lower).")
+            self.logger.info(f"Columna target {target_col} estandarizada (strip, lower).")
 
     def get_original_shape(self) -> Tuple[int, int]:
         if self.__check_df_loaded():
