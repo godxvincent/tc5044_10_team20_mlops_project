@@ -2,7 +2,7 @@ FROM python:3.9-slim
 
 RUN apt update && \ 
     apt install -y gcc libpq-dev && \
-    pip install mlflow \
+    pip install mlflow minio \
     boto3 \
     pymysql \
     cryptography \

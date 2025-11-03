@@ -11,6 +11,8 @@ local:
     mlflowconfig:
       server: "localhost"
       port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -37,6 +39,8 @@ testing:
     mlflowconfig:
       server: "0.0.0.0"
       port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -48,6 +52,8 @@ produccion:
     mlflowconfig:
       server: "0.0.0.0"
       port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
