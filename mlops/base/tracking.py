@@ -3,11 +3,12 @@ Módulo simple para tracking de experimentos con MLflow.
 Implementación sencilla que permite loggear parámetros, métricas y modelos.
 """
 
-import mlflow
-import mlflow.sklearn
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
+import mlflow
+import mlflow.sklearn
 
 from mlops.base.logger import BaseLogger
 from mlops.config import BaseDataClassModel, MLConfigLoader
@@ -16,6 +17,7 @@ from mlops.config import BaseDataClassModel, MLConfigLoader
 @dataclass
 class MLflowConfig(BaseDataClassModel):
     """Configuración de MLflow"""
+
     server: str
     port: str
     experiment_name: str
@@ -41,26 +43,25 @@ class MLflowTracker(BaseLogger):
         self.config = None
         self._active_run = None
         self._experiment_id = None
-        
+
         # Cargar configuración
         try:
             config_loader = MLConfigLoader()
             self.config = config_loader.getParameter("mlflowconfig", MLflowConfig())
-            self.logger.info(f"MLflow config cargada: enabled={self.config.enabled}, server={self.config.server}:{self.config.port}")
+            self.logger.info(
+                f"MLflow config cargada: enabled={self.config.enabled}, server={self.config.server}:{self.config.port}"
+            )
         except Exception as e:
             self.logger.warning(f"Error cargando configuración MLflow: {e}. MLflow deshabilitado.")
             self.config = MLflowConfig(
-                server="localhost",
-                port="5000",
-                experiment_name="Default Experiment",
-                enabled=False
+                server="localhost", port="5000", experiment_name="Default Experiment", enabled=False
             )
 
     def initialize(self, model_name: str) -> None:
         """
         Inicializa conexión con MLflow y configura experimento.
         El nombre del experimento incluye el nombre del modelo.
-        
+
         Args:
             model_name: Nombre del modelo (ej: "RandomForest", "GradientBoosting")
         """
@@ -76,11 +77,11 @@ class MLflowTracker(BaseLogger):
 
             # Crear nombre de experimento que incluya el nombre del modelo
             experiment_name = f"{self.config.experiment_name} - {model_name}"
-            
+
             # Crear o obtener experimento
             mlflow.set_experiment(experiment_name)
             experiment = mlflow.get_experiment_by_name(experiment_name)
-            
+
             if experiment:
                 self._experiment_id = experiment.experiment_id
                 self.logger.info(f"Experimento MLflow: {experiment_name} (ID: {self._experiment_id})")
@@ -88,8 +89,8 @@ class MLflowTracker(BaseLogger):
                 self.logger.warning(f"Experimento {experiment_name} no encontrado")
 
             # Habilitar autologging de scikit-learn
-            #mlflow.sklearn.autolog()
-            #self.logger.info("MLflow sklearn autologging habilitado")
+            # mlflow.sklearn.autolog()
+            # self.logger.info("MLflow sklearn autologging habilitado")
 
         except Exception as e:
             self.logger.error(f"Error inicializando MLflow: {e}")
@@ -100,7 +101,7 @@ class MLflowTracker(BaseLogger):
         """
         Inicia un nuevo run de MLflow.
         El nombre del run incluye un timestamp como prefijo para ordenar.
-        
+
         Args:
             run_name: Nombre del run. Si es None, se genera automáticamente con timestamp.
         """
@@ -140,7 +141,7 @@ class MLflowTracker(BaseLogger):
         """
         Loggea parámetros a MLflow.
         Todos los valores se convierten a string.
-        
+
         Args:
             params: Diccionario de parámetros a loggear
         """
@@ -158,7 +159,7 @@ class MLflowTracker(BaseLogger):
     def log_metrics(self, metrics: Dict[str, float]) -> None:
         """
         Loggea métricas a MLflow.
-        
+
         Args:
             metrics: Diccionario de métricas a loggear (valores numéricos)
         """
@@ -174,7 +175,7 @@ class MLflowTracker(BaseLogger):
     def log_model(self, model: Any, artifact_path: str = "model", input_example: Any = None) -> None:
         """
         Loggea un modelo a MLflow.
-        
+
         Args:
             model: Modelo entrenado (debe ser compatible con mlflow.sklearn)
             artifact_path: Ruta donde guardar el modelo
@@ -192,7 +193,7 @@ class MLflowTracker(BaseLogger):
     def log_artifact(self, local_path: str, artifact_path: Optional[str] = None) -> None:
         """
         Loggea un archivo o directorio como artifact a MLflow.
-        
+
         Args:
             local_path: Ruta local del archivo o directorio a subir
             artifact_path: Ruta donde guardar el artifact en MLflow (opcional, por defecto usa el nombre del archivo)
@@ -210,7 +211,7 @@ class MLflowTracker(BaseLogger):
     def log_text(self, text: str, artifact_file: str) -> None:
         """
         Loggea un texto como artifact a MLflow.
-        
+
         Args:
             text: Contenido de texto a loggear
             artifact_file: Nombre del archivo donde guardar el texto (ej: "classification_report.txt")
@@ -223,4 +224,3 @@ class MLflowTracker(BaseLogger):
             self.logger.info(f"Texto loggeado como artifact: {artifact_file}")
         except Exception as e:
             self.logger.error(f"Error loggeando texto: {e}")
-

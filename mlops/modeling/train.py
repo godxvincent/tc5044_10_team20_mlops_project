@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
 
 from scipy.stats import randint, uniform
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -56,23 +56,21 @@ class ModelTrainer(ModelTrainerBase):
 
     def train(self):
         self._start_mlflow_run()
-        
+
         try:
             self.pipeline = self._createModel()
             search = self._optimize_model(PARAM_DIST_RF)
             self.best_model = search.best_estimator_
             self.best_params_ = search.best_params_
-            
+
             self.logger.info("\nMejores parámetros encontrados:")
             self.logger.info(self.best_params_)
-            
+
             # Loggear parámetros y modelo a MLflow
             params = self._build_training_params()
             self._log_mlflow_params(params)
             self._log_mlflow_model(
-                self.best_model,
-                artifact_path="random_forest_model",
-                input_example=self.datasets["trainX"]
+                self.best_model, artifact_path="random_forest_model", input_example=self.datasets["trainX"]
             )
         except Exception as e:
             self._end_mlflow_run()
@@ -81,34 +79,36 @@ class ModelTrainer(ModelTrainerBase):
     def _build_training_params(self) -> Dict[str, Any]:
         """Construye diccionario de parámetros para logging a MLflow."""
         params = {f"best_{k}": v for k, v in self.best_params_.items()}
-        params.update({
-            "random_state": self.general_params.random_state,
-            "cv_folds": self.model_trainer_config.cv_folds,
-            "scoring": self.model_trainer_config.scoring,
-            "iterations": self.model_trainer_config.iterations,
-            "model_type": "RandomForest"
-        })
+        params.update(
+            {
+                "random_state": self.general_params.random_state,
+                "cv_folds": self.model_trainer_config.cv_folds,
+                "scoring": self.model_trainer_config.scoring,
+                "iterations": self.model_trainer_config.iterations,
+                "model_type": "RandomForest",
+            }
+        )
         return params
-    
+
     def evaluate(self):
         self._ensure_model_trained()
-        
+
         X_test = self.datasets["testX"]
         Y_test = self.datasets["testY"]
         Y_pred = self.best_model.predict(X_test)
-        
+
         # Generar classification report
         report = classification_report(Y_test, Y_pred)
         self.logger.info("\nEvaluación del modelo:")
         self.logger.info(report)
-        
+
         # Calcular y loggear métricas a MLflow
         metrics = self._calculate_metrics(Y_test, Y_pred)
         self._log_mlflow_metrics(metrics)
-        
+
         # Loggear classification report como artifact
         self._log_mlflow_text(report, artifact_file="classification_report.txt")
-        
+
         # Cerrar el run después de la evaluación
         self._end_mlflow_run()
 
@@ -120,7 +120,7 @@ class ModelTrainer(ModelTrainerBase):
             "test_recall": recall_score(y_true, y_pred, average="weighted", zero_division=0),
             "test_f1": f1_score(y_true, y_pred, average="weighted", zero_division=0),
         }
-        
+
     def predict(self, X):
         self._ensure_model_trained()
         return self.best_model.predict(X)
@@ -167,23 +167,21 @@ class ModelTrainerGB(ModelTrainerBase):
 
     def train(self):
         self._start_mlflow_run()
-        
+
         try:
             self.pipeline = self._createModel()
             search = self._optimize_model(PARAM_DIST_GB)
             self.best_model = search.best_estimator_
             self.best_params_ = search.best_params_
-            
+
             self.logger.info("\nMejores parámetros Gradient Boosting:")
             self.logger.info(self.best_params_)
-            
+
             # Loggear parámetros y modelo a MLflow
             params = self._build_training_params()
             self._log_mlflow_params(params)
             self._log_mlflow_model(
-                self.best_model,
-                artifact_path="gradient_boosting_model",
-                input_example=self.datasets["trainX"]
+                self.best_model, artifact_path="gradient_boosting_model", input_example=self.datasets["trainX"]
             )
         except Exception as e:
             self._end_mlflow_run()
@@ -192,34 +190,36 @@ class ModelTrainerGB(ModelTrainerBase):
     def _build_training_params(self) -> Dict[str, Any]:
         """Construye diccionario de parámetros para logging a MLflow."""
         params = {f"best_{k}": v for k, v in self.best_params_.items()}
-        params.update({
-            "random_state": self.general_params.random_state,
-            "cv_folds": self.model_trainer_config.cv_folds,
-            "scoring": self.model_trainer_config.scoring,
-            "iterations": self.model_trainer_config.iterations,
-            "model_type": "GradientBoosting"
-        })
+        params.update(
+            {
+                "random_state": self.general_params.random_state,
+                "cv_folds": self.model_trainer_config.cv_folds,
+                "scoring": self.model_trainer_config.scoring,
+                "iterations": self.model_trainer_config.iterations,
+                "model_type": "GradientBoosting",
+            }
+        )
         return params
 
     def evaluate(self):
         self._ensure_model_trained()
-        
+
         X_test = self.datasets["testX"]
         Y_test = self.datasets["testY"]
         Y_pred = self.best_model.predict(X_test)
-        
+
         # Generar classification report
         report = classification_report(Y_test, Y_pred)
         self.logger.info("\nEvaluación Gradient Boosting:")
         self.logger.info(report)
-        
+
         # Calcular y loggear métricas a MLflow
         metrics = self._calculate_metrics(Y_test, Y_pred)
         self._log_mlflow_metrics(metrics)
-        
+
         # Loggear classification report como artifact
         self._log_mlflow_text(report, artifact_file="classification_report.txt")
-        
+
         # Cerrar el run después de la evaluación
         self._end_mlflow_run()
 
@@ -231,7 +231,6 @@ class ModelTrainerGB(ModelTrainerBase):
             "test_recall": recall_score(y_true, y_pred, average="weighted", zero_division=0),
             "test_f1": f1_score(y_true, y_pred, average="weighted", zero_division=0),
         }
-        
 
     def predict(self, X):
         self._ensure_model_trained()

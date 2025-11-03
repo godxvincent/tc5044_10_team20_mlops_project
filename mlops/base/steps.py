@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Self, Any
+from typing import Any, Dict, Optional, Self
 
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
@@ -55,7 +55,8 @@ class DataLoaderBase(ABC, BaseLogger):
 
     @abstractmethod
     def get_statistics(self) -> DataFrame:
-        # TODO: Definir funcion comun para poder retornar la misma estructura en el DataLoader como en el DataCleaner dado un dataset.
+        # TODO: Definir funcion comun para retornar la misma estructura
+        # en el DataLoader como en el DataCleaner dado un dataset.
         pass
 
     @abstractmethod
@@ -65,9 +66,11 @@ class DataLoaderBase(ABC, BaseLogger):
 
 class FeatureEngineProcessorBase(ABC, BaseLogger):
     """
-    Esta clase define los metodos minimos que deberia tener cualquier clase encargada de hacer limpieza de datos, así como ingenieria de
-    caracteristicas. Esta clase al final deberia retornar un Pipeline con los pasos
-    Por default se espera que esta clase tenga como minimo el dataset al cual se le aplicará la limpieza de datos.
+    Esta clase define los metodos minimos que deberia tener cualquier clase
+    encargada de hacer limpieza de datos, así como ingenieria de caracteristicas.
+    Esta clase al final deberia retornar un Pipeline con los pasos.
+    Por default se espera que esta clase tenga como minimo el dataset al cual
+    se le aplicará la limpieza de datos.
     """
 
     def __init__(self):
@@ -178,6 +181,7 @@ class ModelTrainerBase(ABC, BaseLogger):
         """
         try:
             from mlops.base.tracking import MLflowTracker
+
             self.mlflow_tracker = MLflowTracker()
             if self.mlflow_tracker.config.enabled:
                 self.mlflow_tracker.initialize(model_name=model_name)
@@ -232,7 +236,7 @@ class ModelTrainerBase(ABC, BaseLogger):
             # Verificar si hay un run activo del entrenamiento
             if self.mlflow_tracker._active_run is None:
                 self.logger.warning("No hay run activo de entrenamiento, iniciando nuevo run para evaluación")
-                #self.mlflow_tracker.start_run(run_name="evaluation_only")
+                # self.mlflow_tracker.start_run(run_name="evaluation_only")
 
             self.mlflow_tracker.log_metrics(metrics)
             self.logger.info(f"Métricas loggeadas a MLflow: {list(metrics.keys())}")
@@ -326,7 +330,8 @@ class ModelTrainerBase(ABC, BaseLogger):
     @abstractmethod
     def predict(self) -> DataFrame:
         """
-        La implementación concreta de esta función debe ejecutar el modelo contra un conjunto de pruebas y devolver la predicción.
+        La implementación concreta de esta función debe ejecutar el modelo
+        contra un conjunto de pruebas y devolver la predicción.
         """
         pass
 
