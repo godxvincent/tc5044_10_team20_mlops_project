@@ -79,23 +79,106 @@ Como verá en la configuración inicial ya se han subido los archivos iniciales 
 * [Config Files](https://dvc.org/doc/user-guide/project-structure/configuration)
 * [Configuracion de Google Drive](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive)
 
+## Configuración de Docker y MLflow
+
+Este proyecto utiliza Docker Compose para gestionar los servicios de MLflow, PostgreSQL y MinIO.
+
+### Configuración inicial
+
+Antes de levantar los servicios, es necesario configurar las variables de entorno:
+
+1. Copia el archivo `env.example` a `.env`:
+   ```bash
+   cp env.example .env
+   ```
+
+2. (Opcional) Edita el archivo `.env` si necesitas modificar las credenciales o puertos por defecto:
+   - `PG_USER`, `PG_PASSWORD`, `PG_DATABASE`: Credenciales de PostgreSQL
+   - `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`: Credenciales de MinIO
+   - `MINIO_PORT`, `MINIO_CONSOLE_PORT`: Puertos para MinIO y su consola web
+   - `MLFLOW_PORT`: Puerto para el servidor de MLflow
+
+### Levantar los servicios
+
+Para levantar todos los servicios (MLflow, PostgreSQL, MinIO) ejecuta:
+
+```bash
+docker compose up -d
+```
+
+Este comando iniciará:
+- **MLflow Server**: Disponible en `http://localhost:5000`
+- **PostgreSQL**: Base de datos para el backend store de MLflow (puerto 5432)
+- **MinIO**: Servidor S3-compatible para almacenar artifacts (puerto 9000, consola en 9001)
+
+### Verificar el estado de los servicios
+
+Para ver el estado de los contenedores:
+
+```bash
+docker compose ps
+```
+
+### Ver los logs
+
+Para ver los logs de todos los servicios:
+
+```bash
+docker compose logs -f
+```
+
+Para ver los logs de un servicio específico:
+
+```bash
+docker compose logs -f mlflow
+docker compose logs -f postgres
+docker compose logs -f s3
+```
+
+### Detener los servicios
+
+Para detener todos los servicios:
+
+```bash
+docker compose down
+```
+
+Para detener y eliminar los volúmenes (esto eliminará los datos almacenados):
+
+```bash
+docker compose down -v
+```
+
+### Acceso a los servicios
+
+Una vez levantados los servicios, puedes acceder a:
+
+- **MLflow UI**: http://localhost:5000
+- **MinIO Console**: http://localhost:9001 (usuario y contraseña según `.env`)
+
 ## MLFlow
 
 MLFlow es una plataforma para gestionar el ciclo de vida de ML:
 
 - Tracking: registra parámetros, métricas, artefactos y código de cada experimento.
-- Models: estandariza y versiona modelos (formato empaquetado y “flavors”).
+- Models: estandariza y versiona modelos (formato empaquetado y "flavors").
 - Model Registry: catálogo/registro con versiones y stages (None, Staging, Production, Archived).
 
-MLFlow necesita un server donde almacenara los resultados, para correr este server en local pueden correr el siguiente comando
+El servidor de MLflow está configurado para ejecutarse en Docker. Si prefieres ejecutarlo localmente sin Docker, puedes usar:
 
-`mlflow server --host 127.0.0.1 --port 8080` 
+```bash
+mlflow server --host 127.0.0.1 --port 8080
+```
 
-El cliente puede conectarse al servidor de mlflow mediante la siguiente linea de codigo
+El cliente puede conectarse al servidor de MLflow mediante la siguiente línea de código:
 
-`mlflow.set_tracking_uri("http://127.0.0.1:8080")`
+```python
+mlflow.set_tracking_uri("http://localhost:5000")  # Con Docker
+# o
+mlflow.set_tracking_uri("http://127.0.0.1:8080")  # Sin Docker
+```
 
-MLFlow creara las carpetas /mlruns y /mlartifacts para almacenar los resultados de los modelos, posteriormente trabajaremos para tener un servidor externo donde guardaremos estos resultados.
+La configuración del proyecto en `config.yaml` está configurada para usar el servidor de Docker por defecto (`localhost:5000`).
 
 ### Links de utilidad de MLFlow
 

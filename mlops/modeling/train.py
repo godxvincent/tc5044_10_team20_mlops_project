@@ -1,13 +1,11 @@
 from dataclasses import dataclass
+from typing import Any, Dict
 
 from scipy.stats import randint, uniform
-from sklearn.decomposition import PCA
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score, classification_report, f1_score, precision_score, recall_score
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 
 from mlops.base.steps import ModelTrainerBase
 from mlops.config import BaseDataClassModel, MLConfigLoader
@@ -30,19 +28,6 @@ PARAM_DIST_GB = {
 }
 
 
-# Agregar clase para preprocessing y build model_revisar si ya se tiene en otro archivo#
-
-
-def build_preprocessing_pipeline(k_features=15, n_components=8):
-    return Pipeline(
-        [
-            ("scaler", StandardScaler()),
-            ("feature_selection", SelectKBest(score_func=f_classif, k=k_features)),
-            ("pca", PCA(n_components=n_components)),
-        ]
-    )
-
-
 @dataclass
 class ModelTrainerConfig(BaseDataClassModel):
     iterations: int
@@ -52,9 +37,7 @@ class ModelTrainerConfig(BaseDataClassModel):
     verbose: int
 
     def __init__(self, **kwargs):
-        """
-        Clase modelo de datos para la configuración del data loader.
-        """
+        """Clase modelo de datos para la configuración del model trainer."""
         super().__init__(**kwargs)
 
 
@@ -65,30 +48,85 @@ class ModelTrainer(ModelTrainerBase):
         self.model_trainer_config = mlconfigloader.getParameter("model_trainer", ModelTrainerConfig())
         self.general_params = mlconfigloader.general_parameters
         super().__init__(pipeline, datasets)
+        self._initialize_mlflow_tracker(model_name="RandomForest")
 
     def _createModel(self):
         classifier = RandomForestClassifier(random_state=self.general_params.random_state)
         return Pipeline([("preprocessing", self.pipeline), ("classifier", classifier)])
 
     def train(self):
-        self.pipeline = self._createModel()
-        search = self.optimize_model(PARAM_DIST_RF)
-        self.best_model = search.best_estimator_
-        self.logger.info("\nMejores parámetros encontrados:")
-        self.logger.info(search.best_params_)
-        self.best_params_ = search.best_params_
+        self._start_mlflow_run()
+
+        try:
+            self.pipeline = self._createModel()
+            search = self._optimize_model(PARAM_DIST_RF)
+            self.best_model = search.best_estimator_
+            self.best_params_ = search.best_params_
+
+            self.logger.info("\nMejores parámetros encontrados:")
+            self.logger.info(self.best_params_)
+
+            # Loggear parámetros y modelo a MLflow
+            params = self._build_training_params()
+            self._log_mlflow_params(params)
+            self._log_mlflow_model(
+                self.best_model, artifact_path="random_forest_model", input_example=self.datasets["trainX"]
+            )
+        except Exception as e:
+            self._end_mlflow_run()
+            raise e
+
+    def _build_training_params(self) -> Dict[str, Any]:
+        """Construye diccionario de parámetros para logging a MLflow."""
+        params = {f"best_{k}": v for k, v in self.best_params_.items()}
+        params.update(
+            {
+                "random_state": self.general_params.random_state,
+                "cv_folds": self.model_trainer_config.cv_folds,
+                "scoring": self.model_trainer_config.scoring,
+                "iterations": self.model_trainer_config.iterations,
+                "model_type": "RandomForest",
+            }
+        )
+        return params
 
     def evaluate(self):
+        self._ensure_model_trained()
+
         X_test = self.datasets["testX"]
         Y_test = self.datasets["testY"]
         Y_pred = self.best_model.predict(X_test)
+
+        # Generar classification report
+        report = classification_report(Y_test, Y_pred)
         self.logger.info("\nEvaluación del modelo:")
-        self.logger.info(classification_report(Y_test, Y_pred))
+        self.logger.info(report)
+
+        # Calcular y loggear métricas a MLflow
+        metrics = self._calculate_metrics(Y_test, Y_pred)
+        self._log_mlflow_metrics(metrics)
+
+        # Loggear classification report como artifact
+        self._log_mlflow_text(report, artifact_file="classification_report.txt")
+
+        # Cerrar el run después de la evaluación
+        self._end_mlflow_run()
+
+    def _calculate_metrics(self, y_true, y_pred) -> Dict[str, float]:
+        """Calcula métricas de evaluación del modelo."""
+        return {
+            "test_accuracy": accuracy_score(y_true, y_pred),
+            "test_precision": precision_score(y_true, y_pred, average="weighted", zero_division=0),
+            "test_recall": recall_score(y_true, y_pred, average="weighted", zero_division=0),
+            "test_f1": f1_score(y_true, y_pred, average="weighted", zero_division=0),
+        }
 
     def predict(self, X):
+        self._ensure_model_trained()
         return self.best_model.predict(X)
 
     def get_model_attributes(self):
+        self._ensure_model_trained()
         clf = self.best_model.named_steps["classifier"]
         return {
             "n_estimators": clf.n_estimators,
@@ -97,10 +135,8 @@ class ModelTrainer(ModelTrainerBase):
             "best_params": self.best_params_,
         }
 
-    def optimize_model(self, param_distributions):
-        """
-        Ejecuta RandomizedSearchCV para optimizar hiperparámetros.
-        """
+    def _optimize_model(self, param_distributions):
+        """Ejecuta RandomizedSearchCV para optimizar hiperparámetros."""
         X_train = self.datasets["trainX"]
         Y_train = self.datasets["trainY"]
         search = RandomizedSearchCV(
@@ -119,42 +155,89 @@ class ModelTrainer(ModelTrainerBase):
 
 class ModelTrainerGB(ModelTrainerBase):
     def __init__(self, pipeline, datasets):
-        # Cargar configuración específica para Gradient Boosting
         mlconfigloader = MLConfigLoader()
         self.model_trainer_config = mlconfigloader.getParameter("model_trainer", ModelTrainerConfig())
         self.general_params = mlconfigloader.general_parameters
         super().__init__(pipeline, datasets)
-        self.model = None
+        self._initialize_mlflow_tracker(model_name="GradientBoosting")
 
     def _createModel(self):
         classifier = GradientBoostingClassifier(random_state=self.general_params.random_state)
         return Pipeline([("preprocessing", self.pipeline), ("classifier", classifier)])
 
     def train(self):
-        self.pipeline = self._createModel()
-        search = self.optimize_model(PARAM_DIST_GB)
-        self.best_model = search.best_estimator_
-        self.logger.info("\nMejores parámetros Gradient Boosting:")
-        self.logger.info(search.best_params_)
-        self.best_params_ = search.best_params_
+        self._start_mlflow_run()
+
+        try:
+            self.pipeline = self._createModel()
+            search = self._optimize_model(PARAM_DIST_GB)
+            self.best_model = search.best_estimator_
+            self.best_params_ = search.best_params_
+
+            self.logger.info("\nMejores parámetros Gradient Boosting:")
+            self.logger.info(self.best_params_)
+
+            # Loggear parámetros y modelo a MLflow
+            params = self._build_training_params()
+            self._log_mlflow_params(params)
+            self._log_mlflow_model(
+                self.best_model, artifact_path="gradient_boosting_model", input_example=self.datasets["trainX"]
+            )
+        except Exception as e:
+            self._end_mlflow_run()
+            raise e
+
+    def _build_training_params(self) -> Dict[str, Any]:
+        """Construye diccionario de parámetros para logging a MLflow."""
+        params = {f"best_{k}": v for k, v in self.best_params_.items()}
+        params.update(
+            {
+                "random_state": self.general_params.random_state,
+                "cv_folds": self.model_trainer_config.cv_folds,
+                "scoring": self.model_trainer_config.scoring,
+                "iterations": self.model_trainer_config.iterations,
+                "model_type": "GradientBoosting",
+            }
+        )
+        return params
 
     def evaluate(self):
-        if self.best_model is None:
-            raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
+        self._ensure_model_trained()
+
         X_test = self.datasets["testX"]
         Y_test = self.datasets["testY"]
         Y_pred = self.best_model.predict(X_test)
+
+        # Generar classification report
+        report = classification_report(Y_test, Y_pred)
         self.logger.info("\nEvaluación Gradient Boosting:")
-        self.logger.info(classification_report(Y_test, Y_pred))
+        self.logger.info(report)
+
+        # Calcular y loggear métricas a MLflow
+        metrics = self._calculate_metrics(Y_test, Y_pred)
+        self._log_mlflow_metrics(metrics)
+
+        # Loggear classification report como artifact
+        self._log_mlflow_text(report, artifact_file="classification_report.txt")
+
+        # Cerrar el run después de la evaluación
+        self._end_mlflow_run()
+
+    def _calculate_metrics(self, y_true, y_pred) -> Dict[str, float]:
+        """Calcula métricas de evaluación del modelo."""
+        return {
+            "test_accuracy": accuracy_score(y_true, y_pred),
+            "test_precision": precision_score(y_true, y_pred, average="weighted", zero_division=0),
+            "test_recall": recall_score(y_true, y_pred, average="weighted", zero_division=0),
+            "test_f1": f1_score(y_true, y_pred, average="weighted", zero_division=0),
+        }
 
     def predict(self, X):
-        if self.best_model is None:
-            raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
+        self._ensure_model_trained()
         return self.best_model.predict(X)
 
     def get_model_attributes(self):
-        if self.best_model is None:
-            raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
+        self._ensure_model_trained()
         clf = self.best_model.named_steps["classifier"]
         return {
             "n_estimators": clf.n_estimators,
@@ -164,7 +247,8 @@ class ModelTrainerGB(ModelTrainerBase):
             "best_params": self.best_params_,
         }
 
-    def optimize_model(self, param_distributions):
+    def _optimize_model(self, param_distributions):
+        """Ejecuta RandomizedSearchCV para optimizar hiperparámetros."""
         X_train = self.datasets["trainX"]
         Y_train = self.datasets["trainY"]
         search = RandomizedSearchCV(
@@ -174,7 +258,7 @@ class ModelTrainerGB(ModelTrainerBase):
             cv=self.model_trainer_config.cv_folds,
             scoring=self.model_trainer_config.scoring,
             n_jobs=-1,
-            random_state=self.model_trainer_config.random_state,
+            random_state=self.general_params.random_state,
             verbose=self.model_trainer_config.verbose,
         )
         search.fit(X_train, Y_train)

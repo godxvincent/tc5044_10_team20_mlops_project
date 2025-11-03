@@ -9,8 +9,10 @@ default:
 local:
   mlconfig:
     mlflowconfig:
-      server: "http://127.0.0.1"
-      port: "8080"
+      server: "localhost"
+      port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -35,8 +37,10 @@ local:
 testing:
   mlconfig:
     mlflowconfig:
-      server: "testing_server"
-      port: "8080"
+      server: "0.0.0.0"
+      port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -46,8 +50,10 @@ testing:
 produccion:
   mlconfig:
     mlflowconfig:
-      server: "http://127.0.0.1"
-      port: "8080"
+      server: "0.0.0.0"
+      port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
