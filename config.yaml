@@ -3,23 +3,28 @@ default:
   external_api:
     server: "database_server"
     port: "8080"
+  mlconfig:
+    general:
+      random_state: 42
 local:
   mlconfig:
     mlflowconfig:
-      server: "http://127.0.0.1"
-      port: "8080"
+      server: "localhost"
+      port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
       log_stream : "stdout"
     data_loader:
-      test_data_percentage: 0.2
+      test_size: 0.3
+      outlier_k: 3
     model_trainer:
       iterations: 30
       cv_folds: 5                   
-      scoring: "accuracy"         
-      random_state: 42             
+      scoring: "accuracy"               
       verbose: 2 
     feature_engine:
       k_features: 15 
@@ -32,8 +37,10 @@ local:
 testing:
   mlconfig:
     mlflowconfig:
-      server: "testing_server"
-      port: "8080"
+      server: "0.0.0.0"
+      port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -43,8 +50,10 @@ testing:
 produccion:
   mlconfig:
     mlflowconfig:
-      server: "http://127.0.0.1"
-      port: "8080"
+      server: "0.0.0.0"
+      port: "5000"
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
     logger:
       log_level : "DEBUG"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

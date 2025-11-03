@@ -6,16 +6,19 @@ class MLPipelinePrueba(MLPipelineBase):
     def __init__(self):
         super().__init__()
 
-    def loadData(self, file_name: str):
+    def load_data_step(self, file_name: str):
         pass
 
-    def cleanUpData(self):
+    def clean_up_data_step(self):
         pass
 
-    def train(self):
+    def train_step(self):
         pass
 
-    def evaluate(self):
+    def evaluate_step(self):
+        pass
+
+    def feature_engineering_step(self):
         pass
 
 
@@ -24,16 +27,16 @@ class DataLoaderPrueba(DataLoaderBase):
     def __init__(self):
         super().__init__()
 
-    def loadFile(self, file_name: str):
+    def load_file(self, file_name: str):
         pass
 
-    def getShape(self):
+    def get_shape(self):
         pass
 
-    def getStatistics(self):
+    def get_statistics(self):
         pass
 
-    def getTrainTestDataSet(self):
+    def get_train_test_dataset(self):
         pass
 
 

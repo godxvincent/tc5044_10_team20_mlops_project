@@ -1,0 +1,81 @@
+version: "3.7"
+services:
+  mlflow:
+    container_name: mlflow-server
+    build:
+      context: mlflow_server
+      dockerfile: Dockerfile
+    image: mlflow
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: http://s3:${MINIO_PORT}
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER} 
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
+      MLFLOW_S3_IGNORE_TLS: true
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://${PG_USER}:${PG_PASSWORD}@postgres:${PG_PORT}/${PG_DATABASE}
+      --host 0.0.0.0
+      --port 5000
+      --serve-artifacts
+      --artifacts-destination s3://${MLFLOW_BUCKET_NAME}
+    depends_on:
+      - postgres
+      - s3
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${HOME}/mlruns:/mlflow
+    restart: always
+  # PostgreSQL database
+  postgres:
+    container_name: postgres-server
+    image: postgres:13.3
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE}
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db_data:/var/lib/postgresql/data/
+  # MinIO server
+  s3:
+    image: minio/minio
+    container_name: minio-server
+    expose:
+      - "9000"
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ADDRESS: ${MINIO_ADDRESS}
+      MINIO_PORT: ${MINIO_PORT}
+      MINIO_STORAGE_USE_HTTPS: ${MINIO_STORAGE_USE_HTTPS}
+      MINIO_CONSOLE_ADDRESS: ${MINIO_CONSOLE_ADDRESS}
+    healthcheck:
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 1s
+      timeout: 10s
+      retries: 5
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio_data:/data
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      s3:
+        condition: service_healthy
+    entrypoint: >
+      bash -c "
+      mc alias set minio http://s3:9000 minio_user minio_password &&
+      if ! mc ls minio/mlflow; then
+        mc mb minio/mlflow
+      else
+        echo 'mlflow folder already exists'
+      fi
+      "
+volumes:
+  db_data:
+  minio_data:

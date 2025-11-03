@@ -2,10 +2,14 @@ from dataclasses import dataclass
 from typing import Optional
 
 from sklearn.compose import ColumnTransformer, make_column_transformer
-from sklearn.decomposition import PCA
+
+# from sklearn.decomposition import PCA
+# from sklearn.discriminant_analysis import StandardScaler
+from sklearn.impute import SimpleImputer
 
 from mlops.base.steps import FeatureEngineProcessorBase
 from mlops.config import BaseDataClassModel, MLConfigLoader
+from mlops.modeling.constants import EXPECTED_SCHEMA
 
 
 @dataclass
@@ -24,6 +28,7 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
 
     def __init__(self):
         self.config = MLConfigLoader().getParameter("feature_engine", FeatureEngineProcessorConfig())
+        self.numerical_features = [x for x in EXPECTED_SCHEMA if EXPECTED_SCHEMA[x] in ["float64", "int64"]]
         super().__init__()
 
     def _createImputer(self) -> Optional[ColumnTransformer]:
@@ -31,7 +36,9 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de imputar los valores faltantes.
         """
-        pass
+        return make_column_transformer(
+            (SimpleImputer(strategy="median"), self.numerical_features), remainder="passthrough"
+        )
 
     def _createStandardizer(self) -> Optional[ColumnTransformer]:
         """
@@ -45,6 +52,8 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de escalar los valores de un conjunto de features.
         """
+        # self.__PCAfeaturesScaled = True
+        # return make_column_transformer((StandardScaler(), self.numerical_features),remainder="passthrough")
         pass
 
     def _createOutlierProcessor(self) -> Optional[ColumnTransformer]:
@@ -64,4 +73,5 @@ class FeatureEngineProcessor(FeatureEngineProcessorBase):
         aplique el *scaler* a los features destinados a PCA.
         """
 
-        return make_column_transformer((PCA(n_components=self.config.n_components), self.numerical_features))
+        # return make_column_transformer((PCA(n_components=self.config.n_components), self.numerical_features), remainder="passthrough")
+        pass
