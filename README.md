@@ -184,6 +184,42 @@ La configuración del proyecto en `config.yaml` está configurada para usar el s
 
 * [MLFlow Docs](https://mlflow.org/docs/2.5.0/quickstart.html#)
 
-Nota de prueba de Miriam
-Nota de cambio1 de Esmeralda
-Nota de cambio2 de Esmer
+## Linting y Formateo Automático de Código
+
+Como parte de la reestructuración del proyecto, se integraron herramientas para mantener un código limpio, consistente y conforme a las buenas prácticas de Python (PEP8).
+
+### Herramientas instaladas
+- **Black** → formateador automático de código.  
+- **Flake8** → analizador de estilo y detección de errores.  
+- **isort** → ordena automáticamente las importaciones.  
+- **pre-commit** → ejecuta verificaciones antes de cada commit.  
+
+### Configuración automática
+Estas herramientas se ejecutan de forma local y también en el pipeline de **GitHub Actions** (ver `.github/workflows/lint.yml`).
+
+#### Configuración local
+1. Instalar dependencias:
+    pip install black flake8 isort pre-commit
+2. Instalar los hooks de pre-commit:
+    pre-commit install
+3. Ejecutar el formato y análisis manualmente (opcional):
+    black .
+    isort .
+    flake8 .
+#### Ejecución con Makefile
+También se pueden ejecutar con:
+    make lint         # Corre Flake8
+    make format       # Aplica Black + isort
+    make lint-report  # Genera reportes de linters
+
+## Visualización de Gráficos
+La clase llamada Plotter en mlops/plots.py permite generar gráficos de forma flexible y segura tanto en entornos de notebooks como de terminal
+
+### Características principales
+1. Detección automática del entorno: notebook o script.
+2. Soporte para backends no interactivos (Agg) para ejecución en CI/CD.
+3. Configurable mediante la clase auxiliar PlotConfig.
+4. Métodos disponibles:
+- **plot()** → gráfico de líneas.
+- **bar()** → gráfico de barras.
+- **scatter()** → gráfico de dispersión.
