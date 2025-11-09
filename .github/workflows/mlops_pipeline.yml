@@ -89,9 +89,8 @@ jobs:
             pip install -r requirements.txt
       - name: Download files from dvc
         run: |
-            dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_client_id ${{ secrets.DVC_GSUIT_CLIENT_ID }}
-            dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_client_secret ${{ secrets.DVC_GSUIT_CLIENT_SECRET }}
-            dvc remote modify --local gdrive_acknowledge_abuse true
+            export GDRIVE_CREDENTIALS_DATA='${{ secrets.DVC_GDRIVE_CREDENTIALS_DATA }}'
+            dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_use_service_account true
             dvc push -r ${{ vars.DVC_REMOTE_DATASET }}
             echo "Listing dvc directory to confirm data was pulled correctly"
             ls -lrtaR ${{ github.workspace }}/data
