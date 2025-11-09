@@ -47,7 +47,6 @@ class MLConfigLoader:
                 settings_files=["config.yaml"],
                 environments=True,
                 load_dotenv=True,
-                env_switcher="MLOPS_ENV",
                 merge_enabled=True,
             )
             rootParameters = self.settings.get(DEFAULT_ROOT_PARAMS, None)

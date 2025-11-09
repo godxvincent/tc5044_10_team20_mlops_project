@@ -1,3 +1,6 @@
+import os
+import pathlib
+import sys
 from typing import Self
 
 from mlops.base.steps import MLPipelineBase
@@ -57,6 +60,10 @@ class MLPipeline(MLPipelineBase):
 
 
 if __name__ == "__main__":
+
+    sys.path.append(str(pathlib.Path(__name__).parent.parent.absolute().parent))
+    os.environ["ENV_FOR_DYNACONF"] = "local"
+
     mlpipeline = MLPipeline()
     mlpipeline.load_data_step("turkish_music_emotion_modified.csv")
     mlpipeline.clean_up_data_step()
