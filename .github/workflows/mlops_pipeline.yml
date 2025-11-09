@@ -1,5 +1,5 @@
 name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} Triggered this workflow from ${{ github.ref_name }} 🚀
 on:
   push:
     branches: [ "main" ]
@@ -75,7 +75,7 @@ jobs:
             pip install -r requirements.txt
       - name: checking environment variables
         run: | 
-          export PYTHONPATH=$(pwd)
+          
           echo "Este es el pythonpath: $PYTHONPATH"
   publish:
     needs: build
@@ -85,8 +85,9 @@ jobs:
         env: 
           MLOPS_MLCONFIG__DATABRICKS__client_id: ${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_ID }}
           MLOPS_MLCONFIG__DATABRICKS__client_secret: ${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_SECRET }}
-          ENV_FOR_DYNACONF: ${{ env.CICD_ENV_FOR_DYNACONF }}
+          ENV_FOR_DYNACONF: ${{ vars.CICD_ENV_FOR_DYNACONF }}
         run: |
+          export PYTHONPATH=$(pwd)
           echo "Este es el client id: $MLOPS_MLCONFIG__DATABRICKS__client_id"
           echo "Este es el environment de dynaconf: $ENV_FOR_DYNACONF"
           echo "Este es el pythonpath: $PYTHONPATH"
