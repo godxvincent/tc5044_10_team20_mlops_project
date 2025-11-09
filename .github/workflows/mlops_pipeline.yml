@@ -74,7 +74,7 @@ jobs:
             python -m pip install --upgrade pip
             pip install -r requirements.txt
   publish:
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -91,7 +91,7 @@ jobs:
         run: |
             export GDRIVE_CREDENTIALS_DATA='${{ secrets.DVC_GDRIVE_CREDENTIALS_DATA }}'
             dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_use_service_account true
-            dvc push -r ${{ vars.DVC_REMOTE_DATASET }}
+            dvc pull -r ${{ vars.DVC_REMOTE_DATASET }}
             echo "Listing dvc directory to confirm data was pulled correctly"
             ls -lrtaR ${{ github.workspace }}/data
       - name: "Publishing model to mlflow"
