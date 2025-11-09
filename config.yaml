@@ -29,11 +29,7 @@ local:
     feature_engine:
       k_features: 15 
       n_components: 8
-
-                  
-
-
-
+            
 testing:
   mlconfig:
     mlflowconfig:
@@ -46,6 +42,17 @@ testing:
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
       log_stream : "stdout"
+    data_loader:
+      test_size: 0.3
+      outlier_k: 3
+    model_trainer:
+      iterations: 30
+      cv_folds: 5                   
+      scoring: "accuracy"               
+      verbose: 2 
+    feature_engine:
+      k_features: 15 
+      n_components: 8
 
 produccion:
   mlconfig:
