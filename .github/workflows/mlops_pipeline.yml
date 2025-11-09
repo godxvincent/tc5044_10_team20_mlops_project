@@ -91,6 +91,7 @@ jobs:
         run: |
             dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_client_id ${{ secrets.DVC_GSUIT_CLIENT_ID }}
             dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_client_secret ${{ secrets.DVC_GSUIT_CLIENT_SECRET }}
+            dvc remote modify --local gdrive_acknowledge_abuse true
             dvc push -r ${{ vars.DVC_REMOTE_DATASET }}
             echo "Listing dvc directory to confirm data was pulled correctly"
             ls -lrtaR ${{ github.workspace }}/data
