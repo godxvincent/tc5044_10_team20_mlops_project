@@ -75,6 +75,7 @@ jobs:
             pip install -r requirements.txt
       - name: checking environment variables
         run: | 
+          export PYTHONPATH=$(pwd)
           echo "Este es el pythonpath: $PYTHONPATH"
   publish:
     needs: build
