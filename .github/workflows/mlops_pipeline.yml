@@ -95,12 +95,11 @@ jobs:
             echo "Listing dvc directory to confirm data was pulled correctly"
             ls -lrtaR ${{ github.workspace }}/data
       - name: "Publishing model to mlflow"
-        env: 
-          MLOPS_MLCONFIG__DATABRICKS__client_id: ${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_ID }}
-          MLOPS_MLCONFIG__DATABRICKS__client_secret: ${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_SECRET }}
-          ENV_FOR_DYNACONF: ${{ vars.CICD_ENV_FOR_DYNACONF }}
         run: |
           export PYTHONPATH=$(pwd)
+          export MLOPS_MLCONFIG__DATABRICKS__client_id=${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_ID }}
+          export MLOPS_MLCONFIG__DATABRICKS__client_secret=${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_SECRET }}
+          export ENV_FOR_DYNACONF=${{ vars.CICD_ENV_FOR_DYNACONF }}
           python ./mlops/pipeline.py 
           
           
