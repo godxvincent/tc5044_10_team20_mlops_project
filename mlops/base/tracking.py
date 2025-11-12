@@ -3,6 +3,7 @@ Módulo simple para tracking de experimentos con MLflow.
 Implementación sencilla que permite loggear parámetros, métricas y modelos.
 """
 
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, Optional
@@ -22,6 +23,7 @@ class MLflowConfig(BaseDataClassModel):
     port: str
     experiment_name: str
     enabled: bool
+    databricks: bool
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -30,6 +32,20 @@ class MLflowConfig(BaseDataClassModel):
     def tracking_uri(self) -> str:
         """Retorna la URI completa del tracking server"""
         return f"http://{self.server}:{self.port}"
+
+
+@dataclass
+class DatabricksConfig(BaseDataClassModel):
+    """Configuración de Databricks"""
+
+    host: str
+    client_id: str
+    client_secret: str
+    uri: str
+    experiment_folder: str
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class MLflowTracker(BaseLogger):
@@ -51,6 +67,15 @@ class MLflowTracker(BaseLogger):
             self.logger.info(
                 f"MLflow config cargada: enabled={self.config.enabled}, server={self.config.server}:{self.config.port}"
             )
+            self.databricks_config = DatabricksConfig()
+            # Hay configuracion para ejecutar MLFlow remoto
+            if self.config.databricks:
+                config_loader = MLConfigLoader()
+                self.databricks_config = config_loader.getParameter("databricks", DatabricksConfig())
+                self.logger.info(
+                    f"Databricks config cargada: host {self.databricks_config.host}, uri {self.databricks_config.uri}"
+                )
+
         except Exception as e:
             self.logger.warning(f"Error cargando configuración MLflow: {e}. MLflow deshabilitado.")
             self.config = MLflowConfig(
@@ -72,11 +97,23 @@ class MLflowTracker(BaseLogger):
         try:
             # Configurar tracking URI
             tracking_uri = self.config.tracking_uri
-            mlflow.set_tracking_uri(tracking_uri)
-            self.logger.info(f"MLflow tracking URI: {tracking_uri}")
-
             # Crear nombre de experimento que incluya el nombre del modelo
             experiment_name = f"{self.config.experiment_name} - {model_name}"
+
+            if self.config.databricks:
+                #
+                tracking_uri = self.databricks_config.uri
+                experiment_name = f"{self.databricks_config.experiment_folder}/{experiment_name}"
+                os.environ["DATABRICKS_HOST"] = self.databricks_config.host
+                if os.getenv("DATABRICKS_CLIENT_ID", None) is None:
+                    self.logger.warning("Databricks Client Id will be retrieve from config.yml")
+                    os.environ["DATABRICKS_CLIENT_ID"] = self.databricks_config.client_id
+                if os.getenv("DATABRICKS_CLIENT_SECRET", None) is None:
+                    self.logger.warning("Databricks Client Secret will be retrieve from config.yml")
+                    os.environ["DATABRICKS_CLIENT_SECRET"] = self.databricks_config.client_secret
+
+            self.logger.info(f"MLflow tracking URI: {tracking_uri}")
+            mlflow.set_tracking_uri(tracking_uri)
 
             # Crear o obtener experimento
             mlflow.set_experiment(experiment_name)

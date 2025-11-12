@@ -6,15 +6,21 @@ default:
   mlconfig:
     general:
       random_state: 42
+# Configuracion local
 local:
   mlconfig:
     mlflowconfig:
       server: "localhost"
-      port: "5000"
+      port: "8080"
       experiment_name: "Turkish Music Emotion Classification"
       enabled: true
+      databricks: false
+    databricks:
+      host: ""
+      uri: ""
+      experiment_folder: ""
     logger:
-      log_level : "DEBUG"
+      log_level : "INFO"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
       log_stream : "stdout"
@@ -31,31 +37,64 @@ local:
       n_components: 8
 
                   
-
+# Configuracion del ambiente de pruebas
 
 
 testing:
   mlconfig:
     mlflowconfig:
-      server: "0.0.0.0"
-      port: "5000"
+      server: ""
+      port: ""
       experiment_name: "Turkish Music Emotion Classification"
       enabled: true
+      databricks: true
+    databricks:
+      host: "https://dbc-f73c3f0a-412d.cloud.databricks.com"
+      uri: "databricks"
+      experiment_folder: "/Shared"
     logger:
-      log_level : "DEBUG"
+      log_level : "INFO"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
       log_stream : "stdout"
+    data_loader:
+      test_size: 0.3
+      outlier_k: 3
+    model_trainer:
+      iterations: 30
+      cv_folds: 5                   
+      scoring: "accuracy"               
+      verbose: 2 
+    feature_engine:
+      k_features: 15 
+      n_components: 8
 
+# Configuracion del ambiente de productivo
 produccion:
   mlconfig:
     mlflowconfig:
-      server: "0.0.0.0"
-      port: "5000"
+      server: ""
+      port: ""
       experiment_name: "Turkish Music Emotion Classification"
       enabled: true
+      databricks: true
+    databricks:
+      host: "https://dbc-f73c3f0a-412d.cloud.databricks.com"
+      uri: "databricks"
+      experiment_folder: "/Shared"
     logger:
-      log_level : "DEBUG"
+      log_level : "INFO"
       log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       log_date_format : "%Y-%m-%d %H:%M:%S"
       log_stream : "stdout"
+    data_loader:
+      test_size: 0.3
+      outlier_k: 3
+    model_trainer:
+      iterations: 30
+      cv_folds: 5                   
+      scoring: "accuracy"               
+      verbose: 2 
+    feature_engine:
+      k_features: 15 
+      n_components: 8
