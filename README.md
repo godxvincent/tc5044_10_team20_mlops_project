@@ -223,3 +223,23 @@ La clase llamada Plotter en mlops/plots.py permite generar gráficos de forma fl
 - **plot()** → gráfico de líneas.
 - **bar()** → gráfico de barras.
 - **scatter()** → gráfico de dispersión.
+
+## Serving del modelo con FastAPI
+
+Para exponer el modelo vía API se creó el módulo `mlops.api` con:
+
+- `mlops/api/model_loader.py`: carga el modelo registrado en MLflow usando `MODEL_URI`
+  (por ejemplo: `models:/turkish_music_emotion_rf/1`).
+- `mlops/api/schemas.py`: define los esquemas Pydantic para la entrada y salida:
+  - `PredictionRequest`: recibe un diccionario de features (`features: Dict[str, float>`).
+  - `PredictionResponse`: devuelve la predicción y la ruta del modelo (`model_uri`).
+- `mlops/api/main.py`: define la aplicación FastAPI con:
+  - `GET /health`: verifica el estado de la API y del modelo.
+  - `POST /predict`: recibe un JSON con `features` y devuelve la predicción.
+
+### Ejecución local
+
+```bash
+export MLFLOW_TRACKING_URI=http://localhost:5000
+export MODEL_URI=models:/turkish_music_emotion_rf/1
+uvicorn mlops.api.main:app --reload
