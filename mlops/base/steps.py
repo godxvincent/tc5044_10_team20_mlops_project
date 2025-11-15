@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Self
+from typing import Any, Dict, Optional, Self, Tuple
 
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline, make_pipeline
 
 from mlops.base.logger import BaseLogger
 
@@ -73,37 +73,39 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
     se le aplicará la limpieza de datos.
     """
 
+    _PCAfeaturesScaled = False
+
     def __init__(self):
-        self.__PCAfeaturesScaled = False
+        self._PCAfeaturesScaled = False
         super().__init__(self.__class__.__name__)
 
     def createPipeline(self) -> Pipeline:
 
-        steps = []
+        transformers = []
         imputer = self._createImputer()
         if imputer:
-            steps.append(("imputer", imputer))
+            transformers.append(imputer)
 
         standardizer = self._createStandardizer()
         if standardizer:
-            steps.append(("standardizer", standardizer))
+            transformers.append(standardizer)
 
         outlierProcessor = self._createOutlierProcessor()
         if outlierProcessor:
-            steps.append(("outlierProcessor", outlierProcessor))
+            transformers.append(outlierProcessor)
 
         scaler = self._createScaler()
         if scaler:
-            steps.append(("scaler", scaler))
+            transformers.append(scaler)
 
         featureReducer = self._createFeatureReducer()
-        if featureReducer and self.__PCAfeaturesScaled:
-            steps.append(("PCA", featureReducer))
+        if featureReducer and self._PCAfeaturesScaled:
+            transformers.append(featureReducer)
 
-        return Pipeline(steps=steps).set_output(transform="pandas")
+        return make_pipeline(ColumnTransformer(transformers))
 
     @abstractmethod
-    def _createImputer(self) -> Optional[ColumnTransformer]:
+    def _createImputer(self) -> Optional[Tuple]:
         """
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de imputar los valores faltantes.
@@ -111,7 +113,7 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
         pass
 
     @abstractmethod
-    def _createStandardizer(self) -> Optional[ColumnTransformer]:
+    def _createStandardizer(self) -> Optional[Tuple]:
         """
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de estandarizar los valores como la clase.
@@ -119,7 +121,7 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
         pass
 
     @abstractmethod
-    def _createScaler(self) -> Optional[ColumnTransformer]:
+    def _createScaler(self) -> Optional[Tuple]:
         """
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de escalar los valores de un conjunto de features.
@@ -127,7 +129,7 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
         pass
 
     @abstractmethod
-    def _createOutlierProcessor(self) -> Optional[ColumnTransformer]:
+    def _createOutlierProcessor(self) -> Optional[Tuple]:
         """
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que se encargue de lidiar con los valores atipicos.
@@ -135,7 +137,7 @@ class FeatureEngineProcessorBase(ABC, BaseLogger):
         pass
 
     @abstractmethod
-    def _createFeatureReducer(self) -> Optional[ColumnTransformer]:
+    def _createFeatureReducer(self) -> Optional[Tuple]:
         """
         La implementación concreta de esta función debe contemplar crear un objeto del tipo ColumnTransformer
         que defina la estrategia para reducir el número de features necesarios (p. ej., usando PCA).

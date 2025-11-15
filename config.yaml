@@ -31,10 +31,11 @@ local:
       iterations: 30
       cv_folds: 5                   
       scoring: "accuracy"               
-      verbose: 2 
+      verbose: 0
     feature_engine:
       k_features: 15 
       n_components: 8
+      n_components_f: 0.95
 
                   
 # Configuracion del ambiente de pruebas
@@ -68,6 +69,7 @@ testing:
     feature_engine:
       k_features: 15 
       n_components: 8
+      n_components_f: 0.95
 
 # Configuracion del ambiente de productivo
 produccion:
@@ -98,3 +100,4 @@ produccion:
     feature_engine:
       k_features: 15 
       n_components: 8
+      n_components_f: 0.95
