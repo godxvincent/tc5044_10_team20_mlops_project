@@ -46,7 +46,7 @@ testing:
       server: ""
       port: ""
       experiment_name: "Turkish Music Emotion Classification"
-      enabled: false
+      enabled: true
       databricks: true
     databricks:
       host: "https://dbc-f73c3f0a-412d.cloud.databricks.com"
