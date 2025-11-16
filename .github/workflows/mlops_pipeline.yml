@@ -38,6 +38,14 @@ jobs:
       # FLAKE8 - Busca errores de estilo, sintaxis y patrones inseguros
       - name: Run Flake8
         run: flake8 .
+      
+      - name: Download files from dvc
+        run: |
+            export GDRIVE_CREDENTIALS_DATA='${{ secrets.DVC_GDRIVE_CREDENTIALS_DATA }}'
+            dvc remote modify --local ${{ vars.DVC_REMOTE_DATASET }} gdrive_use_service_account true
+            dvc pull -r ${{ vars.DVC_REMOTE_DATASET }}
+            echo "Listing dvc directory to confirm data was pulled correctly"
+            ls -lrtaR ${{ github.workspace }}/data
 
       - name: Test with pytest
         run: |
