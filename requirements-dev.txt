@@ -9,4 +9,5 @@ cfgv==3.4.0
 autoflake==2.3.1
 isort==7.0.0
 pytest-mock==3.15.1
+dynaconf==3.2.12
 -r requirements.txt
