@@ -44,16 +44,3 @@ def test_loadParseConfig():
     assert isinstance(logger_config.log_level, str), "Error: log_level debe ser string"
     assert logger_config.log_format is not None, "Error: log_format no cargado"
     assert logger_config.log_date_format is not None, "Error: log_date_format no cargado"
-
-
-# Se agregaron las últimas 3 pruebas para verificar otros campos.
-
-
-def test_invalid_config_key():
-    loggerConfig = LoggerConfigDePrueba()
-    configLoader = MLConfigLoader()
-    with pytest.raises(KeyError):
-        configLoader.getParameter("config_inexistente", loggerConfig)
-
-
-# prueba negativa

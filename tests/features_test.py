@@ -1,6 +1,20 @@
+import os
+
+import pytest
 from sklearn.compose import ColumnTransformer
 
-from mlops.modeling.features import FeatureEngineProcessor
+from mlops.features import FeatureEngineProcessor
+
+
+@pytest.fixture(autouse=True)
+def setup_data():
+    # Code to run before each test
+    print("\nSetting up before test")
+    os.environ["ENV_FOR_DYNACONF"] = "testing"
+    yield
+    # Code to run after each test (teardown)
+    os.environ.pop("ENV_FOR_DYNACONF", None)
+    print("\nTearing down after test")
 
 
 def test_feature_engine_processor_initialization():

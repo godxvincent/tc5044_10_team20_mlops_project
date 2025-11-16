@@ -1,8 +1,22 @@
+import os
+
 import pytest
 from sklearn.datasets import make_classification
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
 
-from mlops.modeling.pipeline import build_preprocessing_pipeline
 from mlops.modeling.train import ModelTrainer, ModelTrainerGB
+
+
+@pytest.fixture(autouse=True)
+def setup_data():
+    # Code to run before each test
+    print("\nSetting up before test")
+    os.environ["ENV_FOR_DYNACONF"] = "testing"
+    yield
+    # Code to run after each test (teardown)
+    os.environ.pop("ENV_FOR_DYNACONF", None)
+    print("\nTearing down after test")
 
 
 @pytest.fixture
@@ -13,7 +27,7 @@ def dummy_dataset():
 
 @pytest.fixture
 def preprocessing_pipeline():
-    return build_preprocessing_pipeline(k_features=10, n_components=5)
+    return Pipeline(steps=[("imputer", SimpleImputer(strategy="median"))])
 
 
 def test_model_trainer_predict(dummy_dataset, preprocessing_pipeline):

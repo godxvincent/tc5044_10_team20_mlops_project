@@ -29,22 +29,12 @@ def test_dataloader_class_get_shape():
 # Verifica que el método load_file carga correctamente un archivo CSV y devuelve un DataFrame.
 
 
-def test_load_file_returns_dataframe():
+def test_load_file_returns_dictionary():
     dl_class = DataLoader()
-    df = dl_class.load_file("turkish_music_emotion_modified.csv")
-    assert df is not None
-    assert hasattr(df, "shape")
-    assert df.shape[0] > 0
-
-
-# Verificar que las columnas coincidan con las esperadas en EXPECTED_SCHEMA
-
-
-def test_expected_schema_matches_columns():
-    dl_class = DataLoader()
-    df = dl_class.load_file("turkish_music_emotion_modified.csv")
-    for col in EXPECTED_SCHEMA:
-        assert col in df.columns
+    result = dl_class.load_file("turkish_music_emotion_modified.csv")
+    assert result is not None
+    assert result.get("shape") is not None
+    assert result.get("shape")[0] > 0
 
 
 # Verifica que get_shape() coincide con la forma del DataFrame cargado
@@ -52,10 +42,10 @@ def test_expected_schema_matches_columns():
 
 def test_get_shape_consistency():
     dl_class = DataLoader()
-    df = dl_class.load_file("turkish_music_emotion_modified.csv")
-    shape_from_df = df.shape
+    result = dl_class.load_file("turkish_music_emotion_modified.csv")
+    shape_from_load_file = result["shape"]
     shape_from_method = dl_class.get_shape()
-    assert shape_from_df == shape_from_method
+    assert shape_from_load_file == shape_from_method
 
 
 # Verifica que se manda mensaje de error si el archivo no existe
@@ -72,6 +62,6 @@ def test_load_file_invalid_path():
 
 def test_schema_validation_logic():
     dl_class = DataLoader()
-    df = dl_class.load_file("turkish_music_emotion_modified.csv")
-    mismatches = [col for col in EXPECTED_SCHEMA if col not in df.columns]
+    result = dl_class.load_file("turkish_music_emotion_modified.csv")
+    mismatches = [col for col in EXPECTED_SCHEMA if col not in result["statistics"].columns]
     assert len(mismatches) == 0
