@@ -30,9 +30,9 @@ class MLPipeline(MLPipelineBase):
 
     def feature_engineering_step(self) -> Self:
         try:
-            self.__feature_engine_processor.createPipeline()
             self.__model_trainer = ModelTrainer(
-                self.__feature_engine_processor.createPipeline(), self.__data_loader.get_train_test_dataset()
+                self.__feature_engine_processor.createPipeline(),
+                self.__data_loader.get_train_test_dataset(),
             )
             return self
         except Exception as e:
