@@ -3,7 +3,6 @@ import os
 import pytest
 
 from mlops.dataset import DataLoader
-from mlops.modeling.constants import EXPECTED_SCHEMA
 
 
 @pytest.fixture(autouse=True)
@@ -20,7 +19,6 @@ def setup_data():
 def test_dataloader_class_get_shape():
     dl_class = DataLoader()
     dl_class.load_file("turkish_music_emotion_modified.csv")
-    print(EXPECTED_SCHEMA)
     (filas, columnas) = dl_class.get_shape()
     assert filas == 408
     assert columnas == 52

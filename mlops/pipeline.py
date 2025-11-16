@@ -16,7 +16,6 @@ class MLPipeline(MLPipelineBase):
         super().__init__()
         self.__data_loader = DataLoader()
         self.__feature_engine_processor = FeatureEngineProcessor()
-        # self.__model_trainer = ModelTrainer()
 
     def load_data_step(self, file_name: str) -> Self:
         try:
@@ -107,9 +106,7 @@ class MLPipeline(MLPipelineBase):
         Recupera las métricas de evaluación del modelo (Accuracy, Precision, Recall, F1).
         """
         try:
-            # ⭐ AJUSTE: Asumimos que ModelTrainer.evaluate() almacena las métricas
-            # y tiene un método público para devolverlas (usaremos get_metrics).
-            return self.__model_trainer._calculate_metrics()
+            return self.__model_trainer.get_performance_metrics()
         except AttributeError as e:
             self.logger.error(f"Error al recuperar las métricas: Modelo no configurado o evaluado. {e}")
             raise e
