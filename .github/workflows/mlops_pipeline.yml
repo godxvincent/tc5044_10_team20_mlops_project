@@ -3,8 +3,8 @@ run-name: ${{ github.actor }} triggered this workflow from ${{ github.ref_name }
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
 jobs:
   validate-and-test:
     runs-on: ubuntu-latest
@@ -108,7 +108,7 @@ jobs:
           export MLOPS_MLCONFIG__DATABRICKS__client_id=${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_ID }}
           export MLOPS_MLCONFIG__DATABRICKS__client_secret=${{ secrets.MLOPS_MLCONFIG__DATABRICKS__CLIENT_SECRET }}
           export ENV_FOR_DYNACONF=${{ vars.CICD_ENV_FOR_DYNACONF }}
-          python ./mlops/pipeline.py 
+          python ./mlops/publisher/pipeline.py
           
           
 

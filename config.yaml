@@ -7,7 +7,7 @@ default:
     general:
       random_state: 42
 # Configuracion local
-local:
+local: 
   mlconfig:
     mlflowconfig:
       server: "localhost"
@@ -27,12 +27,12 @@ local:
     data_loader:
       test_size: 0.3
       outlier_k: 3
-    model_trainer:
+    model_trainer: &local_model_trainer 
       iterations: 30
       cv_folds: 5                   
       scoring: "accuracy"               
       verbose: 0
-    feature_engine:
+    feature_engine: &local_feature_engine
       k_features: 15 
       n_components: 8
       n_components_f: 0.95
@@ -49,7 +49,7 @@ testing:
       port: ""
       experiment_name: "Turkish Music Emotion Classification"
       enabled: false
-      databricks: true
+      databricks: false
     databricks:
       host: "https://dbc-f73c3f0a-412d.cloud.databricks.com"
       uri: "databricks"
@@ -71,6 +71,39 @@ testing:
       k_features: 15 
       n_components: 8
       n_components_f: 0.95
+
+publish:
+  mlconfig:
+    mlflowconfig:
+      server: ""
+      port: ""
+      experiment_name: "Turkish Music Emotion Classification"
+      enabled: true
+      databricks: true
+    databricks:
+      host: "https://dbc-f73c3f0a-412d.cloud.databricks.com"
+      uri: "databricks"
+      experiment_folder: "/Shared"
+    logger:
+      log_level : "INFO"
+      log_format : "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+      log_date_format : "%Y-%m-%d %H:%M:%S"
+      log_stream : "stdout"
+    data_loader:
+      test_size: 0.3
+      outlier_k: 3
+    # model_trainer:
+    #   iterations: 30
+    #   cv_folds: 5                   
+    #   scoring: "accuracy"               
+    #   verbose: 2 
+    <<: *local_model_trainer
+    # feature_engine:
+    #   k_features: 15 
+    #   n_components: 8
+    #   n_components_f: 0.95
+    <<: *local_feature_engine
+
 
 # Configuracion del ambiente de productivo
 produccion:

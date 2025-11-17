@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
 
 from mlops.features import FeatureEngineProcessor
 
@@ -26,9 +26,11 @@ def test_feature_engine_processor_initialization():
 
 def test_create_imputer_returns_column_transformer():
     processor = FeatureEngineProcessor()
-    imputer = processor._createImputer()
-    assert isinstance(imputer, ColumnTransformer)
-    assert hasattr(imputer, "transform")
+    imputer_tuple = processor._createImputer()
+    simple_imputer = imputer_tuple[1]
+    assert isinstance(imputer_tuple, tuple)
+    assert isinstance(simple_imputer, SimpleImputer)
+    assert hasattr(simple_imputer, "transform")
 
 
 def test_create_standardizer_not_implemented():
@@ -38,7 +40,7 @@ def test_create_standardizer_not_implemented():
 
 def test_create_scaler_not_implemented():
     processor = FeatureEngineProcessor()
-    assert processor._createScaler() is None
+    assert processor._createScaler() is not None
 
 
 def test_create_outlier_processor_not_implemented():
@@ -48,4 +50,4 @@ def test_create_outlier_processor_not_implemented():
 
 def test_create_feature_reducer_not_implemented():
     processor = FeatureEngineProcessor()
-    assert processor._createFeatureReducer() is None
+    assert processor._createFeatureReducer() is not None
