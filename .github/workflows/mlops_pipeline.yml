@@ -9,7 +9,7 @@ jobs:
   validate-and-test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 event ${{ github.event }} event."
+      - run: echo "🎉 event ${{ github.event.action }} event."
       - run: echo "🎉 action ${{ github.action }} event."
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
