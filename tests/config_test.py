@@ -22,6 +22,9 @@ class LoggerConfigDePrueba(BaseDataClassModel):
         super().__init__(**kwargs)
 
 
+# No necesitas definir __init__ manualmente si usas @dataclass, a menos que estés haciendo algo especial. En este caso, puedes eliminarlo:
+
+
 @pytest.fixture(autouse=True)
 def setup_data():
     # Code to run before each test
@@ -38,3 +41,6 @@ def test_loadParseConfig():
     configLoader = MLConfigLoader()
     logger_config = configLoader.getParameter("logger", loggerConfig)
     assert logger_config.log_stream is not None, "Error: No se pudo cargar la configuración"
+    assert isinstance(logger_config.log_level, str), "Error: log_level debe ser string"
+    assert logger_config.log_format is not None, "Error: log_format no cargado"
+    assert logger_config.log_date_format is not None, "Error: log_date_format no cargado"

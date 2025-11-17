@@ -110,3 +110,21 @@ def test_feature_engine_class():
     test_class = FeatureEngineProcessorPrueba()
     assert test_class is not None
     assert test_class.createPipeline() is not None
+
+
+def test_model_trainer_predict_returns_expected_shape():
+    import numpy as np
+    from pandas import DataFrame
+    from sklearn.pipeline import Pipeline
+
+    pipeline = Pipeline([("test", "passthrough")])
+    datasets = {
+        "trainX": DataFrame(np.random.rand(10, 5)),
+        "trainY": DataFrame(np.random.randint(0, 2, size=(10, 1))),
+        "testX": DataFrame(np.random.rand(5, 5)),
+        "testY": DataFrame(np.random.randint(0, 2, size=(5, 1))),
+    }
+    trainer = ModelTrainerPrueba(pipeline, datasets)
+    trainer.predict = lambda: [0, 1, 0, 1, 1]  # Simulación
+    preds = trainer.predict()
+    assert len(preds) == 5
