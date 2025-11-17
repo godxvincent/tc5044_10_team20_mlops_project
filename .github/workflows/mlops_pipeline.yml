@@ -105,6 +105,7 @@ jobs:
           path: ./htmlcov/**
           retention-days: 5
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - run: echo "🍏 This the merge status ${{ github.event.pull_request.merged }}."
   # build:
   #   needs: validate-and-test
   #   runs-on: ubuntu-latest
