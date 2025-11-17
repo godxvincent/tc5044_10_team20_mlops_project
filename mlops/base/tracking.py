@@ -306,21 +306,3 @@ class MLflowTracker(BaseLogger):
         except Exception as e:
             self.logger.error(f"Error iniciando nested run de MLflow: {e}")
             raise e
-
-    def register_model(self, model_name: str, artifact_path: str) -> None:
-        """
-        Registra el modelo en el Model Registry de MLflow.
-
-        Args:
-            model_name: Nombre del modelo en el registry (ej: "turkish_music_emotion_rf")
-            artifact_path: Ruta del artifact del modelo en el run actual
-        """
-        if not self.config.enabled or not self._active_run:
-            return
-
-        try:
-            model_uri = f"runs:/{self._active_run.info.run_id}/{artifact_path}"
-            mlflow.register_model(model_uri=model_uri, name=model_name)
-            self.logger.info(f"Modelo registrado en Model Registry: {model_name}")
-        except Exception as e:
-            self.logger.error(f"Error registrando modelo en Model Registry: {e}")
