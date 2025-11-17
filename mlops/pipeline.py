@@ -1,6 +1,3 @@
-import os
-import pathlib
-import sys
 from typing import Any, Dict, Self, Tuple
 
 from pandas import DataFrame
@@ -113,18 +110,3 @@ class MLPipeline(MLPipelineBase):
         except Exception as e:
             self.logger.error(f"Error al recuperar las métricas del modelo: {e}")
             raise e
-
-
-if __name__ == "__main__":
-
-    sys.path.append(str(pathlib.Path(__name__).parent.parent.absolute().parent))
-    dynaconf_env = os.getenv("ENV_FOR_DYNACONF", None)
-    if not dynaconf_env:
-        os.environ["ENV_FOR_DYNACONF"] = "local"
-
-    mlpipeline = MLPipeline()
-    mlpipeline.load_data_step("turkish_music_emotion_modified.csv")
-    mlpipeline.clean_up_data_step()
-    mlpipeline.feature_engineering_step()
-    mlpipeline.train_step()
-    mlpipeline.evaluate_step()
