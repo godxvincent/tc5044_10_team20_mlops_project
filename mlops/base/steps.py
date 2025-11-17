@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Self, Tuple
 
+import numpy as np
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline, make_pipeline
@@ -172,6 +173,7 @@ class ModelTrainerBase(ABC, BaseLogger):
         self.best_model = None
         self.best_params_ = None
         self.mlflow_tracker = None
+        self._training_run_id = None  # Guardar run_id del entrenamiento para nested runs
         super().__init__(self.__class__.__name__)
 
     def _initialize_mlflow_tracker(self, model_name: str) -> None:
@@ -198,6 +200,10 @@ class ModelTrainerBase(ABC, BaseLogger):
         """Inicia un run de MLflow si está disponible."""
         if self.mlflow_tracker and self.mlflow_tracker.config.enabled:
             self.mlflow_tracker.start_run()
+            # Guardar run_id del entrenamiento si no está guardado
+            if self._training_run_id is None and self.mlflow_tracker._active_run:
+                self._training_run_id = self.mlflow_tracker._active_run.info.run_id
+                self.logger.debug(f"Run ID de entrenamiento guardado: {self._training_run_id}")
 
     def _end_mlflow_run(self) -> None:
         """Finaliza el run activo de MLflow si existe."""
@@ -304,6 +310,195 @@ class ModelTrainerBase(ABC, BaseLogger):
         """Valida que el modelo haya sido entrenado antes de evaluar o predecir."""
         if self.best_model is None:
             raise ValueError("El modelo no ha sido entrenado. Ejecuta train() primero.")
+
+    def evaluate_drift(self, drift_scenarios: list[Dict[str, Any]] | None = None) -> Dict[str, Any]:
+        """
+        Evalúa data drift en diferentes escenarios.
+
+        Args:
+            drift_scenarios: Lista de escenarios de drift a evaluar.
+                           Si es None, usa escenario por defecto (covariate_shift leve).
+
+        Returns:
+            Diccionario con resultados de todas las evaluaciones
+        """
+        self._ensure_model_trained()
+
+        # Obtener métricas de baseline del test set
+        from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
+        X_test = self.datasets["testX"]
+        Y_test = self.datasets["testY"]
+        Y_pred = self.best_model.predict(X_test)
+
+        baseline_metrics = {
+            "accuracy": float(accuracy_score(Y_test, Y_pred)),
+            "precision": float(precision_score(Y_test, Y_pred, average="weighted", zero_division=0)),
+            "recall": float(recall_score(Y_test, Y_pred, average="weighted", zero_division=0)),
+            "f1": float(f1_score(Y_test, Y_pred, average="weighted", zero_division=0)),
+        }
+
+        self.logger.info("Métricas de baseline calculadas")
+        self.logger.info(f"Baseline - Accuracy: {baseline_metrics['accuracy']:.4f}, F1: {baseline_metrics['f1']:.4f}")
+
+        # Si no se proporcionan escenarios, usar el escenario por defecto
+        if drift_scenarios is None:
+            drift_scenarios = [
+                {
+                    "name": "covariate_shift_mild",
+                    "type": "covariate_shift",
+                    "params": {
+                        "features": ["_Tempo_Mean", "_RMSenergy_Mean"],
+                        "mean_shift": 0.1,
+                        "variance_factor": 1.05,
+                    },
+                }
+            ]
+
+        from mlops.monitoring.drift_evaluator import DriftEvaluator
+
+        evaluator = DriftEvaluator(
+            model=self.best_model,
+            reference_data=X_test,
+            reference_target=Y_test,
+            baseline_metrics=baseline_metrics,
+        )
+
+        # Evaluar cada escenario (cada uno en su propio nested run)
+        all_results = {}
+        for scenario in drift_scenarios:
+            scenario_name = scenario.get("name", "unknown")
+            drift_type = scenario.get("type")
+            drift_params = scenario.get("params", {})
+
+            self.logger.info(f"Evaluando escenario: {scenario_name}")
+
+            # Crear nested run como child del run de entrenamiento
+            # Asumimos que siempre hay un run de entrenamiento (_training_run_id)
+            if self._training_run_id and self.mlflow_tracker:
+                import mlflow
+
+                run_name = f"drift_detection_{scenario_name}"
+                self.mlflow_tracker.start_nested_run(parent_run_id=self._training_run_id, run_name=run_name)
+
+                # Añadir tags al nested run
+                mlflow.set_tag("run_type", "drift_detection")
+                mlflow.set_tag("scenario_name", scenario_name)
+                mlflow.set_tag("drift_type", drift_type)
+
+            try:
+                result = evaluator.evaluate_drift_scenario(drift_type, drift_params)
+                all_results[scenario_name] = result
+
+                # Loggear a MLflow (en el nested run del escenario)
+                if self.mlflow_tracker and self.mlflow_tracker._active_run:
+                    self._log_drift_results_to_mlflow(scenario_name, result)
+
+            except Exception as e:
+                self.logger.error(f"Error evaluando escenario {scenario_name}: {e}")
+                all_results[scenario_name] = {"error": str(e)}
+            finally:
+                # Cerrar el nested run del escenario
+                if self.mlflow_tracker and self.mlflow_tracker._active_run:
+                    self._end_mlflow_run()
+
+        return all_results
+
+    def _log_drift_results_to_mlflow(self, scenario_name: str, result: Dict[str, Any]) -> None:
+        """
+        Loggea resultados de drift a MLflow.
+
+        Args:
+            scenario_name: Nombre del escenario
+            result: Resultados de la evaluación de drift
+        """
+        if not (self.mlflow_tracker and self.mlflow_tracker.config.enabled):
+            self.logger.debug("MLflow deshabilitado, omitiendo logging de drift")
+            return
+
+        try:
+            # Loggear parámetros del drift
+            drift_params = result.get("drift_params", {})
+            mlflow_params = {
+                "drift_scenario": scenario_name,
+                "drift_type": result.get("drift_type", "unknown"),
+            }
+            for key, value in drift_params.items():
+                mlflow_params[f"drift_{key}"] = str(value) if isinstance(value, list) else value
+
+            self._log_mlflow_params(mlflow_params)
+
+            # Loggear métricas de drift (usando KS de alibi-detect)
+            drift_metrics = result.get("drift_metrics", {})
+            if drift_metrics:
+                # Extraer p_values y distances de KS
+                p_values = []
+                distances = []
+                drift_detected_count = 0
+
+                # Excluir '_all_features' del conteo individual
+                for key, v in drift_metrics.items():
+                    if key == "_all_features":
+                        continue
+                    p_val = v.get("p_value", np.nan)
+                    dist = v.get("distance", np.nan)
+                    drift_detected = v.get("drift_detected", False)
+
+                    if isinstance(p_val, (int, float)) and not np.isnan(p_val):
+                        p_values.append(float(p_val))
+                    if isinstance(dist, (int, float)) and not np.isnan(dist):
+                        distances.append(float(dist))
+                    if drift_detected:
+                        drift_detected_count += 1
+
+                mlflow_drift_metrics = {}
+
+                # Loggear p-values
+                if p_values:
+                    mlflow_drift_metrics.update(
+                        {
+                            "drift_p_value_mean": float(np.mean(p_values)),
+                            "drift_p_value_min": float(np.min(p_values)),
+                        }
+                    )
+
+                # Loggear distances (KS)
+                if distances:
+                    mlflow_drift_metrics.update(
+                        {
+                            "drift_ks_distance_mean": float(np.mean(distances)),
+                            "drift_ks_distance_max": float(np.max(distances)),
+                        }
+                    )
+
+                # Loggear información de drift detection
+                mlflow_drift_metrics["drift_features_with_drift"] = drift_detected_count
+                mlflow_drift_metrics["drift_detected"] = drift_detected_count > 0
+                mlflow_drift_metrics["drift_method"] = "ks"
+
+                if mlflow_drift_metrics:
+                    self._log_mlflow_metrics(mlflow_drift_metrics)
+
+            # Loggear métricas de performance
+            performance_metrics = result.get("performance_metrics", {})
+            if performance_metrics:
+                mlflow_perf_metrics = {f"drift_{k}": v for k, v in performance_metrics.items()}
+                self._log_mlflow_metrics(mlflow_perf_metrics)
+
+            # Loggear comparación con baseline
+            comparison = result.get("comparison", {})
+            if comparison:
+                mlflow_comparison = {}
+                for metric_name, comp_data in comparison.items():
+                    mlflow_comparison[f"drift_{metric_name}_drop"] = comp_data.get("drop", 0.0)
+                    mlflow_comparison[f"drift_{metric_name}_drop_percent"] = comp_data.get("drop_percent", 0.0)
+
+                self._log_mlflow_metrics(mlflow_comparison)
+
+            self.logger.info(f"Resultados de drift loggeados a MLflow para escenario: {scenario_name}")
+
+        except Exception as e:
+            self.logger.error(f"Error loggeando resultados de drift a MLflow: {e}")
 
     @abstractmethod
     def _createModel(self) -> Pipeline:

@@ -72,6 +72,9 @@ class ModelTrainer(ModelTrainerBase):
             self._log_mlflow_model(
                 self.best_model, artifact_path="random_forest_model", input_example=self.datasets["trainX"]
             )
+            # Registrar modelo en Model Registry
+            if self.mlflow_tracker and self.mlflow_tracker._active_run:
+                self.mlflow_tracker.register_model("turkish_music_emotion_rf", "random_forest_model")
         except Exception as e:
             self._end_mlflow_run()
             raise e
@@ -189,6 +192,9 @@ class ModelTrainerGB(ModelTrainerBase):
             self._log_mlflow_model(
                 self.best_model, artifact_path="gradient_boosting_model", input_example=self.datasets["trainX"]
             )
+            # Registrar modelo en Model Registry
+            if self.mlflow_tracker and self.mlflow_tracker._active_run:
+                self.mlflow_tracker.register_model("turkish_music_emotion_gb", "gradient_boosting_model")
         except Exception as e:
             self._end_mlflow_run()
             raise e

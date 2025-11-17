@@ -11,7 +11,7 @@ local:
   mlconfig:
     mlflowconfig:
       server: "localhost"
-      port: "8080"
+      port: "5000"
       experiment_name: "Turkish Music Emotion Classification"
       enabled: true
       databricks: false
