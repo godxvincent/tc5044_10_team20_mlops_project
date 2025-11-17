@@ -95,13 +95,13 @@ jobs:
       - name: Archive xml files for code coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report-xml
+          name: integration-code-coverage-report-xml
           path: coverage.xml
           retention-days: 5
       - name: Archive html files for code coverage results
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report-html
+          name: integration-code-coverage-report-html
           path: ./htmlcov/**
           retention-days: 5
       - run: echo "🍏 This job's status is ${{ job.status }}."
