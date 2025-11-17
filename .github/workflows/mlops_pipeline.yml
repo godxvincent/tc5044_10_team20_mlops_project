@@ -1,8 +1,8 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} triggered this workflow from ${{ github.ref_name }} 🚀
 on:
-  push:
-    branches: [ "main" ]
+  # push:
+  #   branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 jobs:
