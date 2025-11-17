@@ -103,8 +103,8 @@ class ModelTrainer(ModelTrainerBase):
         self.logger.info(report)
 
         # Calcular y loggear métricas a MLflow
-        metrics = self._calculate_metrics(Y_test, Y_pred)
-        self._log_mlflow_metrics(metrics)
+        self.__metrics = self._calculate_metrics(Y_test, Y_pred)
+        self._log_mlflow_metrics(self.__metrics)
 
         # Loggear classification report como artifact
         self._log_mlflow_text(report, artifact_file="classification_report.txt")
@@ -151,6 +151,12 @@ class ModelTrainer(ModelTrainerBase):
         )
         search.fit(X_train, Y_train)
         return search
+
+    def get_performance_metrics(self):
+        if self.__metrics:
+            return self.__metrics
+        else:
+            raise Exception("la función evaluate() debe ser llamada primero")
 
 
 class ModelTrainerGB(ModelTrainerBase):

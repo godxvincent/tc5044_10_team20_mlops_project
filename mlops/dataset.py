@@ -73,6 +73,8 @@ class DataLoader(DataLoaderBase):
             self.logger.warning(
                 "El dataset solo fue cargado en memoria debe ejecutarse la función run_cleaning_up() explicítamente"
             )
+            return {"shape": self.df.shape, "statistics": self.df.describe(include="all")}
+
         except FileNotFoundError as e:
             self.logger.error(f"File {file_name} not found")
             self.logger.error(f"Make sure input file is located in this directory {DEFAULT_EXTERNAL_DIR}")
@@ -85,7 +87,7 @@ class DataLoader(DataLoaderBase):
 
     def get_statistics(self) -> DataFrame:
         if self.__check_df_loaded:
-            return self.df.describe()
+            return self.df.describe(include="all")
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
     def get_train_test_dataset(self) -> Dict[str, DataFrame]:
@@ -276,7 +278,7 @@ class DataLoader(DataLoaderBase):
 
     def get_original_statistics(self) -> DataFrame:
         if self.__check_df_loaded():
-            return self.__df_original.describe()
+            return self.__df_original.describe(include="all")
         raise Exception("DataFrame no cargado. Llama a loadFile() primero.")
 
 
