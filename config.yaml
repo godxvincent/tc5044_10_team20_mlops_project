@@ -41,13 +41,14 @@ local:
 # Configuracion del ambiente de pruebas
 
 
+            
 testing:
   mlconfig:
     mlflowconfig:
       server: ""
       port: ""
       experiment_name: "Turkish Music Emotion Classification"
-      enabled: true
+      enabled: false
       databricks: true
     databricks:
       host: "https://dbc-f73c3f0a-412d.cloud.databricks.com"
@@ -62,7 +63,7 @@ testing:
       test_size: 0.3
       outlier_k: 3
     model_trainer:
-      iterations: 30
+      iterations: 5
       cv_folds: 5                   
       scoring: "accuracy"               
       verbose: 2 

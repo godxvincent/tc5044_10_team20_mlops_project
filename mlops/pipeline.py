@@ -1,7 +1,9 @@
 import os
 import pathlib
 import sys
-from typing import Self
+from typing import Any, Dict, Self, Tuple
+
+from pandas import DataFrame
 
 from mlops.base.steps import MLPipelineBase
 from mlops.dataset import DataLoader
@@ -33,9 +35,9 @@ class MLPipeline(MLPipelineBase):
 
     def feature_engineering_step(self) -> Self:
         try:
-            self.__feature_engine_processor.createPipeline()
             self.__model_trainer = ModelTrainer(
-                self.__feature_engine_processor.createPipeline(), self.__data_loader.get_train_test_dataset()
+                self.__feature_engine_processor.createPipeline(),
+                self.__data_loader.get_train_test_dataset(),
             )
             return self
         except Exception as e:
@@ -56,6 +58,60 @@ class MLPipeline(MLPipelineBase):
             return self
         except Exception as e:
             self.logger.error(f"Error al intentar evaluar el performance del modelo: {e}")
+            raise e
+
+    def get_dataframe_statistics(self) -> DataFrame:
+        try:
+            return self.__data_loader.get_statistics()
+        except Exception as e:
+            self.logger.error(f"Error al intentar recuperar estadísticas: {e}")
+            raise e
+
+    def get_dataframe_shape(self) -> Tuple:
+        try:
+            return self.__data_loader.get_shape()
+        except Exception as e:
+            self.logger.error(f"Error al recuperar las dimensiones: {e}")
+            raise e
+
+    def get_original_dataframe_statistics(self) -> DataFrame:
+        try:
+            return self.__data_loader.get_original_statistics()
+        except Exception as e:
+            self.logger.error(f"Error al intentar recuperar estadísticas: {e}")
+            raise e
+
+    def get_original_dataframe_shape(self) -> Tuple:
+        try:
+            return self.__data_loader.get_original_shape()
+        except Exception as e:
+            self.logger.error(f"Error al recuperar las dimensiones: {e}")
+            raise e
+
+    def get_model_params(self) -> Dict[str, Any]:
+        """
+        Recupera los parámetros y la importancia de las características del modelo entrenado.
+        """
+        try:
+            return self.__model_trainer.get_model_attributes()
+        except AttributeError as e:
+            self.logger.error(f"Error al recuperar los parámetros: Modelo no configurado o entrenado. {e}")
+            raise e
+        except Exception as e:
+            self.logger.error(f"Error al recuperar los parámetros del modelo: {e}")
+            raise e
+
+    def get_model_metrics(self) -> Dict[str, float]:
+        """
+        Recupera las métricas de evaluación del modelo (Accuracy, Precision, Recall, F1).
+        """
+        try:
+            return self.__model_trainer.get_performance_metrics()
+        except AttributeError as e:
+            self.logger.error(f"Error al recuperar las métricas: Modelo no configurado o evaluado. {e}")
+            raise e
+        except Exception as e:
+            self.logger.error(f"Error al recuperar las métricas del modelo: {e}")
             raise e
 
 
