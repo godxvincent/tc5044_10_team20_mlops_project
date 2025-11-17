@@ -97,12 +97,13 @@ publish:
     #   cv_folds: 5                   
     #   scoring: "accuracy"               
     #   verbose: 2 
-    <<: *local_model_trainer
+    model_trainer: *local_model_trainer
     # feature_engine:
     #   k_features: 15 
     #   n_components: 8
     #   n_components_f: 0.95
-    <<: *local_feature_engine
+        # feature_engine:
+    feature_engine: *local_feature_engine
 
 
 # Configuracion del ambiente de productivo
