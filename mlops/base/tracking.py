@@ -75,6 +75,11 @@ class MLflowTracker(BaseLogger):
                 self.logger.info(
                     f"Databricks config cargada: host {self.databricks_config.host}, uri {self.databricks_config.uri}"
                 )
+                if not self.databricks_config.client_id or not self.databricks_config.client_secret:
+                    self.config.enabled = False
+                    self.logger.warning(
+                        "MLFlow remoto en databricks no se encuentra configurado no se inicializará mlflow"
+                    )
 
         except Exception as e:
             self.logger.warning(f"Error cargando configuración MLflow: {e}. MLflow deshabilitado.")
@@ -101,7 +106,6 @@ class MLflowTracker(BaseLogger):
             experiment_name = f"{self.config.experiment_name} - {model_name}"
 
             if self.config.databricks:
-                #
                 tracking_uri = self.databricks_config.uri
                 experiment_name = f"{self.databricks_config.experiment_folder}/{experiment_name}"
                 os.environ["DATABRICKS_HOST"] = self.databricks_config.host
