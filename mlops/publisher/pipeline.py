@@ -17,3 +17,6 @@ if __name__ == "__main__":
     ml_pipeline.feature_engineering_step()
     ml_pipeline.train_step()
     ml_pipeline.evaluate_step()
+    # Ejecutar evaluación de data drift con los 3 escenarios predefinidos
+    drift_results = ml_pipeline.drift_monitoring_step()
+    print(f"\n✅ Drift detection completado. Resultados: {len(drift_results)} escenarios evaluados")

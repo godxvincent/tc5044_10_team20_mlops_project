@@ -265,3 +265,44 @@ class MLflowTracker(BaseLogger):
             self.logger.info(f"Texto loggeado como artifact: {artifact_file}")
         except Exception as e:
             self.logger.error(f"Error loggeando texto: {e}")
+
+    def start_nested_run(self, parent_run_id: str, run_name: Optional[str] = None) -> None:
+        """
+        Inicia un nested run (child run) bajo un run padre.
+
+        Usa MLflowClient para crear el run hijo directamente, permitiendo
+        crear nested runs incluso cuando el run padre está cerrado.
+
+        Args:
+            parent_run_id: ID del run padre
+            run_name: Nombre del nested run. Si es None, se usa "drift_detection"
+        """
+        if not self.config.enabled:
+            self.logger.debug("MLflow está deshabilitado, omitiendo start_nested_run")
+            return
+
+        try:
+            if run_name is None:
+                run_name = "drift_detection"
+
+            from mlflow.tracking import MlflowClient
+
+            client = MlflowClient()
+
+            # Crear el run hijo usando el client con parent_run_id
+            run = client.create_run(
+                experiment_id=self._experiment_id,
+                run_name=run_name,
+                tags={"mlflow.parentRunId": parent_run_id},
+            )
+
+            # Activar el run creado
+            self._active_run = mlflow.start_run(run_id=run.info.run_id)
+
+            self.logger.info(
+                f"MLflow nested run iniciado: {run_name} "
+                f"(ID: {self._active_run.info.run_id}, Parent: {parent_run_id})"
+            )
+        except Exception as e:
+            self.logger.error(f"Error iniciando nested run de MLflow: {e}")
+            raise e

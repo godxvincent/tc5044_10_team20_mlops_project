@@ -110,3 +110,55 @@ class MLPipeline(MLPipelineBase):
         except Exception as e:
             self.logger.error(f"Error al recuperar las métricas del modelo: {e}")
             raise e
+
+    def drift_monitoring_step(self, drift_scenarios=None):
+        """
+        Ejecuta evaluación de data drift.
+
+        Args:
+            drift_scenarios: Escenarios personalizados de drift.
+                           Si es None, usa los 3 escenarios predefinidos:
+                           - covariate_shift_mild
+                           - covariate_shift_moderate
+                           - missing_data_10pct
+
+        Returns:
+            Diccionario con resultados de la evaluación de drift por escenario
+        """
+        try:
+            # Si no se proporcionan escenarios, usar los 3 escenarios predefinidos
+            if drift_scenarios is None:
+                drift_scenarios = [
+                    {
+                        "name": "covariate_shift_mild",
+                        "type": "covariate_shift",
+                        "params": {
+                            "features": ["_Tempo_Mean", "_RMSenergy_Mean"],
+                            "mean_shift": 0.1,  # 10% de la desviación estándar
+                            "variance_factor": 1.05,
+                        },
+                    },
+                    {
+                        "name": "covariate_shift_moderate",
+                        "type": "covariate_shift",
+                        "params": {
+                            "features": ["_Tempo_Mean", "_RMSenergy_Mean", "_Brightness_Mean"],
+                            "mean_shift": 0.5,  # 50% de la desviación estándar
+                            "variance_factor": 1.2,
+                        },
+                    },
+                    {
+                        "name": "missing_data_10pct",
+                        "type": "missing_data",
+                        "params": {
+                            "missing_rate": 0.1,  # 10% de valores faltantes
+                            "columns": None,  # Todas las columnas numéricas
+                        },
+                    },
+                ]
+
+            results = self.__model_trainer.evaluate_drift(drift_scenarios)
+            return results
+        except Exception as e:
+            self.logger.error(f"Error en evaluación de drift: {e}")
+            raise e
